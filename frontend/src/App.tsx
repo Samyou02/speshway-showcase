@@ -26,6 +26,7 @@ const ManageServices = lazy(() => import("./pages/admin/ManageServices"));
 const ManagePortfolio = lazy(() => import("./pages/admin/ManagePortfolio"));
 const ManageTeam = lazy(() => import("./pages/admin/ManageTeam"));
 const ManageGallery = lazy(() => import("./pages/admin/ManageGallery"));
+const ManageClients = lazy(() => import("./pages/admin/ManageClients"));
 
 // Loading component
 const PageLoader = () => (
@@ -58,7 +59,9 @@ const App = () => (
             <Route path="/admin/portfolio" element={<ManagePortfolio />} />
             <Route path="/admin/team" element={<ManageTeam />} />
             <Route path="/admin/gallery" element={<ManageGallery />} />
+            <Route path="/admin/clients" element={<ManageClients />} />
             <Route path="/admin/submissions" element={<Submissions />} />
+            <Route path="/admin" element={<AdminLogin />} /> {/* Redirect /admin to login */}
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

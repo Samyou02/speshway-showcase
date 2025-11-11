@@ -7,7 +7,9 @@ const {
   updateGalleryItem,
   deleteGalleryItem,
   getGalleryStats,
-  getCategories
+  getCategories,
+  createCategory,
+  deleteCategory
 } = require('../controllers/galleryController');
 const { protect, admin } = require('../middleware/authMiddleware');
 const multer = require('multer');
@@ -35,6 +37,8 @@ router.get('/categories', getCategories);
 router.get('/:id', getGalleryItem);
 
 // Admin routes (protected)
+router.post('/categories', protect, admin, createCategory);
+router.delete('/categories/:name', protect, admin, deleteCategory);
 router.post('/', protect, admin, uploadGalleryImage.single('image'), createGalleryItem);
 router.put('/:id', protect, admin, uploadGalleryImage.single('image'), updateGalleryItem);
 router.delete('/:id', protect, admin, deleteGalleryItem);

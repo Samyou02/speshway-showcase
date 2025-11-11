@@ -10,7 +10,10 @@ const getGalleryItems = async (req, res) => {
     const { category, limit = 12, page = 1, sort = '-date' } = req.query;
     
     // Build query
-    const query = { isActive: true };
+    const query = { 
+      isActive: true,
+      title: { $ne: 'Category Placeholder' } // Exclude placeholder items from public view
+    };
     if (category && category !== 'all') {
       query.category = category;
     }
@@ -95,14 +98,7 @@ const createGalleryItem = async (req, res) => {
       });
     }
 
-    // Validate category
-    const validCategories = ['Fests', 'Awards', 'Fun Activities', 'Team Moments'];
-    if (!validCategories.includes(category)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid category. Must be one of: Fests, Awards, Fun Activities, Team Moments'
-      });
-    }
+    // Category validation removed - allow any category
 
     // Check if image was uploaded
     if (!req.file) {
@@ -172,16 +168,7 @@ const updateGalleryItem = async (req, res) => {
       });
     }
 
-    // Validate category if provided
-    if (category) {
-      const validCategories = ['Fests', 'Awards', 'Fun Activities', 'Team Moments'];
-      if (!validCategories.includes(category)) {
-        return res.status(400).json({
-          success: false,
-          message: 'Invalid category. Must be one of: Fests, Awards, Fun Activities, Team Moments'
-        });
-      }
-    }
+    // Category validation removed - allow any category
 
     // Store old image info in case we need to delete it
     const oldImagePublicId = galleryItem.image.publicId;
@@ -328,22 +315,128 @@ const getGalleryStats = async (req, res) => {
 // @access  Public
 const getCategories = async (req, res) => {
   try {
-    // Get unique categories from the database
+    // Get unique categories from the database (including inactive items)
     const categories = await Gallery.distinct('category');
     
-    // If no categories exist, return the default ones
+    // Also get categories from recently created items (even if placeholder was deleted)
+    // We'll maintain a separate collection or use a different approach
     const defaultCategories = ['Fests', 'Awards', 'Fun Activities', 'Team Moments'];
-    const availableCategories = categories.length > 0 ? categories : defaultCategories;
+    
+    // Combine existing categories with defaults, removing duplicates
+    const allCategories = [...new Set([...categories, ...defaultCategories])];
+    
+    // Sort categories alphabetically
+    allCategories.sort();
 
     res.status(200).json({
       success: true,
-      data: availableCategories
+      data: allCategories
     });
   } catch (error) {
     console.error('Error fetching categories:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch categories',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Create new category
+// @route   POST /api/gallery/categories
+// @access  Private (Admin)
+const createCategory = async (req, res) => {
+  try {
+    const { name } = req.body;
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Category name is required'
+      });
+    }
+
+    const trimmedName = name.trim();
+    
+    // Check if category already exists (including placeholder items)
+    const existingCategory = await Gallery.findOne({ 
+      category: trimmedName,
+      title: 'Category Placeholder'
+    });
+    
+    if (existingCategory) {
+      return res.status(400).json({
+        success: false,
+        message: 'Category already exists'
+      });
+    }
+
+    // Create a persistent placeholder gallery item with the new category
+    // This item will remain to track the category existence
+    const placeholderItem = await Gallery.create({
+      title: 'Category Placeholder',
+      description: 'Placeholder item for category tracking - do not delete',
+      category: trimmedName,
+      image: {
+        url: 'placeholder',
+        publicId: 'placeholder'
+      },
+      createdBy: req.user.id,
+      isActive: false, // Make it inactive so it doesn't show in public gallery
+      order: -1 // Use negative order to keep placeholders at the bottom
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Category created successfully',
+      data: trimmedName
+    });
+  } catch (error) {
+    console.error('Error creating category:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create category',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Delete category
+// @route   DELETE /api/gallery/categories/:name
+// @access  Private (Admin)
+const deleteCategory = async (req, res) => {
+  try {
+    const { name } = req.params;
+    
+    // Check if there are any active gallery items using this category
+    const activeItemsCount = await Gallery.countDocuments({ 
+      category: name, 
+      isActive: true,
+      title: { $ne: 'Category Placeholder' }
+    });
+    
+    if (activeItemsCount > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot delete category. There are ${activeItemsCount} active gallery items using this category.`
+      });
+    }
+
+    // Find and delete the placeholder item for this category
+    await Gallery.deleteMany({ 
+      category: name, 
+      title: 'Category Placeholder' 
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Category deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting category:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete category',
       error: error.message
     });
   }
@@ -356,5 +449,7 @@ module.exports = {
   updateGalleryItem,
   deleteGalleryItem,
   getGalleryStats,
-  getCategories
+  getCategories,
+  createCategory,
+  deleteCategory
 };

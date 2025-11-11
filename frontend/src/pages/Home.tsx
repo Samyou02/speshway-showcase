@@ -6,8 +6,15 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import heroImage from "@/assets/hero-bg.png";
 import { FadeIn, StaggerContainer, StaggerItem, HoverScale } from "@/components/animations";
+import { useQuery } from '@tanstack/react-query';
+import api from '@/lib/api';
 
 const Home = () => {
+  const { data: clients } = useQuery({
+    queryKey: ['clients'],
+    queryFn: () => api.get('/clients').then(res => res.data),
+  });
+
   const features = [
     {
       icon: Code,
@@ -105,7 +112,7 @@ const Home = () => {
               <StaggerItem>
                 <HoverScale scale={1.05}>
                   <Card className="p-8 bg-card/50 backdrop-blur-sm border-border text-center group hover:border-primary/50 transition-all">
-              <div className="text-5xl font-bold text-primary mb-2 group-hover:scale-110 transition-transform">100+</div>
+                    <div className="text-5xl font-bold text-primary mb-2 group-hover:scale-110 transition-transform">100+</div>
                     <div className="text-muted-foreground">Projects Delivered</div>
                   </Card>
                 </HoverScale>
@@ -147,10 +154,10 @@ const Home = () => {
                 <StaggerItem key={index}>
                   <HoverScale>
                     <Card className="p-6 bg-card/50 backdrop-blur-sm border-border hover:border-primary/50 transition-all duration-300 group hover:shadow-lg hover:shadow-primary/10">
-                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4 group-hover:animate-glow transition-all">
-                  <feature.icon className="text-primary" size={24} />
-                </div>
-                <h3 className="text-xl font-semibold text-foreground mb-2">{feature.title}</h3>
+                      <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4 group-hover:animate-glow transition-all">
+                        <feature.icon className="text-primary" size={24} />
+                      </div>
+                      <h3 className="text-xl font-semibold text-foreground mb-2">{feature.title}</h3>
                       <p className="text-muted-foreground">{feature.description}</p>
                     </Card>
                   </HoverScale>
@@ -170,20 +177,34 @@ const Home = () => {
               Proud to serve industry leaders across various sectors
             </p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-            {[
-              "Cloudmile", "Deccan Motors", "Zari", "Instaloan",
-              "Thrive", "Wizklub", "Cyber Eagle Management", "Sunyway Solar",
-              "Cognito", "We Save Blog", "Apollo Diagnostics", "Scaler Academy",
-              "Bridgeweave", "Shanthi Gears", "Craftsvilla", "Pepperfry",
-              "M Mart", "APTA", "Sunrisers", "Coco Loco"
-            ].map((client, index) => (
-              <Card key={index} className="p-6 bg-card/50 backdrop-blur-sm border-border hover:border-primary/50 transition-all text-center group">
-                <div className="text-2xl font-bold text-primary mb-2 group-hover:scale-110 transition-transform">{client}</div>
-                <p className="text-muted-foreground text-sm">Trusted Partner</p>
-              </Card>
-            ))}
-          </div>
+          {clients && clients.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-6xl mx-auto">
+              {clients.filter((client: any) => client.isActive).map((client: any) => (
+                <Card key={client._id} className="p-6 bg-card/50 backdrop-blur-sm border-border hover:border-primary/50 transition-all text-center group">
+                  {client.logo && (
+                    <img
+                      src={client.logo}
+                      alt={client.name}
+                      className="w-16 h-16 object-contain mx-auto mb-4 rounded"
+                    />
+                  )}
+                  <div className="text-xl font-semibold text-primary mb-2 group-hover:scale-110 transition-transform">{client.name}</div>
+                  {client.website && (
+                    <a href={client.website} target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                      Visit Website
+                    </a>
+                  )}
+                  {client.description && (
+                    <p className="text-sm text-muted-foreground mt-2">{client.description}</p>
+                  )}
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center">
+              <p className="text-muted-foreground">No clients added yet. Admin can add clients from the admin panel.</p>
+            </div>
+          )}
         </div>
       </section>
 

@@ -282,13 +282,102 @@ const ManageGallery = () => {
     });
   };
 
-  const handleAddCategory = () => {
-    // Backend only allows specific categories, so disable custom category addition
-    toast({
-      title: "Not Allowed",
-      description: "Only predefined categories are allowed: Fests, Awards, Fun Activities, Team Moments",
-      variant: "destructive"
-    });
+  const handleAddCategory = async () => {
+    if (!newCategoryName.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Please enter a category name",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        toast({
+          title: "Authentication Error",
+          description: "Please login again",
+          variant: "destructive"
+        });
+        navigate('/admin/login');
+        return;
+      }
+      
+      const response = await fetch(`${API_URL}/gallery/categories`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name: newCategoryName.trim() })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Failed to create category' }));
+        throw new Error(errorData.message || 'Failed to create category');
+      }
+
+      toast({
+        title: "Success",
+        description: "Category created successfully"
+      });
+
+      setNewCategoryName('');
+      setShowNewCategoryInput(false);
+      fetchCategories();
+    } catch (error) {
+      console.error('Error creating category:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to create category",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDeleteCategory = async (categoryName: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        toast({
+          title: "Authentication Error",
+          description: "Please login again",
+          variant: "destructive"
+        });
+        navigate('/admin/login');
+        return;
+      }
+      
+      const response = await fetch(`${API_URL}/gallery/categories/${encodeURIComponent(categoryName)}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Failed to delete category' }));
+        throw new Error(errorData.message || 'Failed to delete category');
+      }
+
+      toast({
+        title: "Success",
+        description: "Category deleted successfully"
+      });
+
+      fetchCategories();
+      if (selectedCategory === categoryName) {
+        setSelectedCategory('all');
+      }
+    } catch (error) {
+      console.error('Error deleting category:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete category",
+        variant: "destructive"
+      });
+    }
   };
 
   const getCategoryColor = (category: string) => {
@@ -333,7 +422,7 @@ const ManageGallery = () => {
             </div>
 
             {/* Category Filter */}
-            <div className="mb-6">
+            <div className="mb-6 flex items-center gap-4">
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                 <SelectTrigger className="w-48">
                   <SelectValue placeholder="Select category" />
@@ -341,10 +430,77 @@ const ManageGallery = () => {
                 <SelectContent>
                   <SelectItem value="all">All Categories</SelectItem>
                   {categories.map(category => (
-                    <SelectItem key={category} value={category}>{category}</SelectItem>
+                    <SelectItem key={category} value={category}>
+                      <div className="flex items-center justify-between w-full">
+                        <span>{category}</span>
+                        {category !== 'Fests' && category !== 'Awards' && category !== 'Fun Activities' && category !== 'Team Moments' && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0 ml-2"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteCategory(category);
+                            }}
+                          >
+                            <Trash2 size={12} />
+                          </Button>
+                        )}
+                      </div>
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              
+              {!showNewCategoryInput ? (
+                <Button
+                  onClick={() => setShowNewCategoryInput(true)}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <Plus size={16} />
+                  Add Category
+                </Button>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="text"
+                    placeholder="Enter category name"
+                    value={newCategoryName}
+                    onChange={(e) => setNewCategoryName(e.target.value)}
+                    className="w-48"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        handleAddCategory();
+                      }
+                      if (e.key === 'Escape') {
+                        setShowNewCategoryInput(false);
+                        setNewCategoryName('');
+                      }
+                    }}
+                    autoFocus
+                  />
+                  <Button
+                    onClick={handleAddCategory}
+                    size="sm"
+                    className="flex items-center gap-1"
+                  >
+                    <Plus size={14} />
+                    Add
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setShowNewCategoryInput(false);
+                      setNewCategoryName('');
+                    }}
+                    variant="outline"
+                    size="sm"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              )}
             </div>
 
             {/* Gallery Grid */}

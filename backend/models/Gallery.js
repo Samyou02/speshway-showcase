@@ -25,7 +25,6 @@ const gallerySchema = new mongoose.Schema({
   category: {
     type: String,
     required: true,
-    enum: ['Fests', 'Awards', 'Fun Activities', 'Team Moments'],
     index: true
   },
   date: {
