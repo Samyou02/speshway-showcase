@@ -29,14 +29,25 @@ const ManageClients = () => {
   const navigate = useNavigate();
 
   const { data: clients, isLoading } = useQuery({
-    queryKey: ['clients'],
-    queryFn: () => api.get('/clients').then(res => res.data),
+    queryKey: ['clients', 'admin'],
+    queryFn: () => api.get('/clients?all=true').then(res => {
+      // Handle both array response and wrapped response
+      const data = res.data;
+      return Array.isArray(data) ? data : (data?.data || data || []);
+    }),
   });
 
   const createMutation = useMutation({
     mutationFn: (data: any) => api.post('/clients', data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['clients'] });
+    onSuccess: (response) => {
+      // Handle response data (axios wraps in .data)
+      const newClient = response.data?.data || response.data;
+      // Optimistically update the cache immediately - add at beginning (latest first)
+      queryClient.setQueryData(['clients', 'admin'], (old: any) => {
+        return old ? [newClient, ...old] : [newClient];
+      });
+      // Invalidate public query to update homepage
+      queryClient.invalidateQueries({ queryKey: ['clients'], exact: false });
       toast({ title: 'Client created successfully' });
       resetForm();
       setIsDialogOpen(false);
@@ -52,8 +63,15 @@ const ManageClients = () => {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) => api.put(`/clients/${id}`, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['clients'] });
+    onSuccess: (response, variables) => {
+      // Handle response data (axios wraps in .data)
+      const updatedClient = response.data?.data || response.data;
+      // Optimistically update the cache immediately
+      queryClient.setQueryData(['clients', 'admin'], (old: any) => {
+        return old ? old.map((item: any) => item._id === variables.id ? updatedClient : item) : [updatedClient];
+      });
+      // Invalidate public query to update homepage
+      queryClient.invalidateQueries({ queryKey: ['clients'], exact: false });
       toast({ title: 'Client updated successfully' });
       resetForm();
       setIsDialogOpen(false);
@@ -101,8 +119,13 @@ const ManageClients = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Clean up the data - convert empty strings to empty strings (backend handles defaults)
     const data = {
-      ...formData
+      name: formData.name.trim(),
+      logo: formData.logo.trim() || '',
+      website: formData.website.trim() || '',
+      description: formData.description.trim() || '',
+      isActive: formData.isActive
     };
 
     if (editingClient) {

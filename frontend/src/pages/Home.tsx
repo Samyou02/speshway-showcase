@@ -12,7 +12,11 @@ import api from '@/lib/api';
 const Home = () => {
   const { data: clients } = useQuery({
     queryKey: ['clients'],
-    queryFn: () => api.get('/clients').then(res => res.data),
+    queryFn: () => api.get('/clients').then(res => {
+      // Handle both array response and wrapped response
+      const data = res.data;
+      return Array.isArray(data) ? data : (data?.data || data || []);
+    }),
   });
 
   const features = [

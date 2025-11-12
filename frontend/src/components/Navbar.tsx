@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -7,6 +7,7 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -16,11 +17,16 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
+
   const navLinks = [
     { path: "/", label: "Home" },
     { path: "/about", label: "About" },
     { path: "/services", label: "Services" },
-    { path: "/portfolio", label: "Our Projects" },
+    { path: "/portfolio", label: "Projects" },
     { path: "/gallery", label: "Gallery" },
     { path: "/team", label: "Team" },
     { path: "/career", label: "Career" },
@@ -30,6 +36,13 @@ const Navbar = () => {
   const adminLinks = [
     { path: "/admin/login", label: "Admin" },
   ];
+
+  const isActive = (path: string) => {
+    if (path === "/") {
+      return location.pathname === "/";
+    }
+    return location.pathname.startsWith(path);
+  };
 
   return (
     <nav
@@ -48,7 +61,7 @@ const Navbar = () => {
               alt="Speshway Logo" 
               className="w-8 h-8 sm:w-10 sm:h-10 group-hover:scale-110 transition-transform duration-300"
             />
-            <span className="text-sm sm:text-lg md:text-xl font-bold text-foreground hidden sm:inline-block">
+            <span className="text-sm sm:text-lg md:text-xl font-bold text-foreground hidden sm:inline-block" style={{ fontFamily: 'Times New Roman, serif' }}>
               <span className="hidden md:inline">Speshway Solutions Private Limited</span>
               <span className="md:hidden">Speshway</span>
               <span className="text-primary">.</span>
@@ -56,60 +69,82 @@ const Navbar = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-6 xl:space-x-8">
-            {navLinks.map((link) => (
+          <div className="hidden lg:flex items-center space-x-4 xl:space-x-6">
+            {navLinks.map((link, index) => (
               <Link
                 key={link.path}
                 to={link.path}
-                className={`text-sm font-medium transition-all duration-300 relative group hover-lift ${
-                  location.pathname === link.path
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate(link.path);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className={`relative px-3 py-2 text-sm font-medium transition-all duration-300 ease-out group ${
+                  isActive(link.path)
                     ? "text-primary"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {link.label}
+                <span className="relative z-10">{link.label}</span>
+                {/* Active underline */}
                 <span
-                  className={`absolute -bottom-1 left-0 w-full h-0.5 bg-primary transform origin-left transition-transform duration-300 ${
-                    location.pathname === link.path ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+                  className={`absolute bottom-0 left-0 right-0 h-0.5 bg-primary transform origin-left transition-all duration-300 ${
+                    isActive(link.path) 
+                      ? "scale-x-100 opacity-100" 
+                      : "scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-100"
                   }`}
                 />
+                {/* Hover background effect */}
+                <span className="absolute inset-0 bg-primary/5 rounded-md scale-0 group-hover:scale-100 transition-transform duration-300 origin-center opacity-0 group-hover:opacity-100" />
               </Link>
             ))}
             {adminLinks.map((link) => (
               <Link
                 key={link.path}
                 to={link.path}
-                className={`text-sm font-medium transition-all duration-300 relative group hover-lift ${
-                  location.pathname === link.path
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate(link.path);
+                }}
+                className={`relative px-3 py-2 text-sm font-medium transition-all duration-300 ease-out group ${
+                  isActive(link.path)
                     ? "text-primary"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {link.label}
+                <span className="relative z-10">{link.label}</span>
                 <span
-                  className={`absolute -bottom-1 left-0 w-full h-0.5 bg-primary transform origin-left transition-transform duration-300 ${
-                    location.pathname === link.path ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+                  className={`absolute bottom-0 left-0 right-0 h-0.5 bg-primary transform origin-left transition-all duration-300 ${
+                    isActive(link.path) 
+                      ? "scale-x-100 opacity-100" 
+                      : "scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-100"
                   }`}
                 />
+                <span className="absolute inset-0 bg-primary/5 rounded-md scale-0 group-hover:scale-100 transition-transform duration-300 origin-center opacity-0 group-hover:opacity-100" />
               </Link>
             ))}
-            <Link to="/contact">
-              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/30">
-                Contact Us
-              </Button>
-            </Link>
+            <Button 
+              onClick={(e) => {
+                e.preventDefault();
+                navigate("/contact");
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6 py-2 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/30 active:scale-95"
+            >
+              Contact Us
+            </Button>
           </div>
 
           {/* Mobile Menu Button */}
           <button
-            className="lg:hidden text-foreground p-2 rounded-lg hover:bg-secondary/50 transition-colors duration-300"
+            className="lg:hidden text-foreground p-2 rounded-lg hover:bg-secondary/50 transition-all duration-300 active:scale-95"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle menu"
           >
             {isMobileMenuOpen ? (
-              <X size={24} className="animate-scale-in" />
+              <X size={24} className="transition-transform duration-300 rotate-0" />
             ) : (
-              <Menu size={24} className="animate-scale-in" />
+              <Menu size={24} className="transition-transform duration-300" />
             )}
           </button>
         </div>
@@ -120,18 +155,29 @@ const Navbar = () => {
             isMobileMenuOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
           }`}
         >
-          <div className="py-4 space-y-3 border-t border-border">
+          <div className="py-4 space-y-2 border-t border-border">
             {navLinks.map((link, index) => (
               <Link
                 key={link.path}
                 to={link.path}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={`block py-3 px-4 rounded-lg text-sm font-medium transition-all duration-300 animate-slide-in-right ${
-                  location.pathname === link.path
-                    ? "text-primary bg-primary/10"
-                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate(link.path);
+                  setIsMobileMenuOpen(false);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className={`block py-3 px-4 rounded-lg text-sm font-medium transition-all duration-300 transform ${
+                  isMobileMenuOpen 
+                    ? "translate-x-0 opacity-100" 
+                    : "translate-x-full opacity-0"
+                } ${
+                  isActive(link.path)
+                    ? "text-primary bg-primary/10 border-l-2 border-primary"
+                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/50 active:bg-secondary/70"
                 }`}
-                style={{ animationDelay: `${index * 0.05}s` }}
+                style={{ 
+                  transitionDelay: isMobileMenuOpen ? `${index * 0.05}s` : '0s'
+                }}
               >
                 {link.label}
               </Link>
@@ -140,22 +186,49 @@ const Navbar = () => {
               <Link
                 key={link.path}
                 to={link.path}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={`block py-3 px-4 rounded-lg text-sm font-medium transition-all duration-300 animate-slide-in-right ${
-                  location.pathname === link.path
-                    ? "text-primary bg-primary/10"
-                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate(link.path);
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`block py-3 px-4 rounded-lg text-sm font-medium transition-all duration-300 transform ${
+                  isMobileMenuOpen 
+                    ? "translate-x-0 opacity-100" 
+                    : "translate-x-full opacity-0"
+                } ${
+                  isActive(link.path)
+                    ? "text-primary bg-primary/10 border-l-2 border-primary"
+                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/50 active:bg-secondary/70"
                 }`}
-                style={{ animationDelay: `${(navLinks.length + index) * 0.05}s` }}
+                style={{ 
+                  transitionDelay: isMobileMenuOpen ? `${(navLinks.length + index) * 0.05}s` : '0s'
+                }}
               >
                 {link.label}
               </Link>
             ))}
-            <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 pt-2">
-              <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold transition-all duration-300 hover:scale-105 animate-scale-in">
+            <div 
+              className={`px-4 pt-2 transition-all duration-300 transform ${
+                isMobileMenuOpen 
+                  ? "translate-x-0 opacity-100" 
+                  : "translate-x-full opacity-0"
+              }`}
+              style={{ 
+                transitionDelay: isMobileMenuOpen ? `${(navLinks.length + adminLinks.length) * 0.05}s` : '0s'
+              }}
+            >
+              <Button 
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate("/contact");
+                  setIsMobileMenuOpen(false);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold transition-all duration-300 hover:scale-105 active:scale-95"
+              >
                 Contact Us
               </Button>
-            </Link>
+            </div>
           </div>
         </div>
       </div>

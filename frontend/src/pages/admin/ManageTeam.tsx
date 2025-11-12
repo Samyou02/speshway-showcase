@@ -41,8 +41,13 @@ const ManageTeam = () => {
         'Content-Type': 'multipart/form-data',
       },
     }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['team'] });
+    onSuccess: (response) => {
+      // Handle response data (axios wraps in .data)
+      const newMember = response.data?.data || response.data;
+      // Optimistically update the cache immediately - add at beginning (latest first)
+      queryClient.setQueryData(['team'], (old: any) => {
+        return old ? [newMember, ...old] : [newMember];
+      });
       toast({ title: 'Team member created successfully' });
       resetForm();
       setIsDialogOpen(false);
@@ -62,8 +67,13 @@ const ManageTeam = () => {
         'Content-Type': 'multipart/form-data',
       },
     }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['team'] });
+    onSuccess: (response, variables) => {
+      // Handle response data (axios wraps in .data)
+      const updatedMember = response.data?.data || response.data;
+      // Optimistically update the cache immediately
+      queryClient.setQueryData(['team'], (old: any) => {
+        return old ? old.map((item: any) => item._id === variables.id ? updatedMember : item) : [updatedMember];
+      });
       toast({ title: 'Team member updated successfully' });
       resetForm();
       setIsDialogOpen(false);

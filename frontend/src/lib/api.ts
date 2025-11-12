@@ -17,9 +17,23 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
-    // Only add auth header for admin routes or if explicitly needed
-    if (token && (config.url?.includes('/admin') || config.url?.includes('/auth') || config.headers?.['X-Require-Auth'])) {
-      config.headers.Authorization = `Bearer ${token}`;
+    if (token) {
+      // Add auth header for:
+      // 1. Admin routes
+      // 2. Auth routes
+      // 3. POST/PUT/DELETE/PATCH requests (write operations)
+      // 4. GET requests with ?all=true (admin queries)
+      // 5. Submissions routes (admin only)
+      const method = (config.method || '').toLowerCase();
+      const isAdminRoute = config.url?.includes('/admin') || config.url?.includes('/auth');
+      const isSubmissionsRoute = config.url?.includes('/submissions') || config.url?.includes('/submission/');
+      const isWriteOperation = method === 'post' || method === 'put' || method === 'delete' || method === 'patch';
+      const isAdminQuery = config.url?.includes('?all=true');
+      const requiresAuth = config.headers?.['X-Require-Auth'];
+      
+      if (isAdminRoute || isSubmissionsRoute || isWriteOperation || isAdminQuery || requiresAuth) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     return config;
   },

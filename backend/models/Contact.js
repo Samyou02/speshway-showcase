@@ -44,6 +44,21 @@ const contactSchema = new mongoose.Schema({
     enum: ['new', 'read', 'replied'],
     default: 'new'
   },
+  replies: [{
+    message: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    repliedBy: {
+      type: String,
+      required: true
+    },
+    repliedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
   createdAt: {
     type: Date,
     default: Date.now

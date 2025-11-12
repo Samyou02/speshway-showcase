@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Mail, Phone, MapPin, Send } from "lucide-react";
+import { Mail, Phone, MapPin, Send, FileText } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { Link } from "react-router-dom";
 import api from "@/lib/api";
 
 const Contact = () => {
@@ -65,8 +66,8 @@ const Contact = () => {
     {
       icon: Phone,
       title: "Call Us",
-      content: "+91 9100006020",
-      link: "tel:+919100006020",
+      content: "+91 9876543210",
+      link: "tel:+91 9876543210",
     },
     {
       icon: MapPin,
@@ -134,7 +135,18 @@ const Contact = () => {
             <Card className="p-6 sm:p-8 md:p-12 bg-card/50 backdrop-blur-sm border-border hover-glow animate-scale-in">
               <div className="text-center mb-6 sm:mb-8">
                 <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">Send Us a Message</h2>
-                <p className="text-sm sm:text-base text-muted-foreground">Fill out the form below and we'll respond within 24 hours</p>
+                <p className="text-sm sm:text-base text-muted-foreground mb-4">Fill out the form below and we'll respond within 24 hours</p>
+                <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 mb-6">
+                  <p className="text-sm text-muted-foreground mb-2">
+                    <strong className="text-foreground">Looking for a job?</strong> We're always looking for talented individuals to join our team.
+                  </p>
+                  <Link to="/send-resume">
+                    <Button variant="outline" size="sm" className="w-full sm:w-auto">
+                      <FileText size={16} className="mr-2" />
+                      Submit Your Resume
+                    </Button>
+                  </Link>
+                </div>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">

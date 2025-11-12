@@ -29,7 +29,7 @@ const Dashboard = () => {
       color: 'from-blue-500/20 to-cyan-500/20'
     },
     {
-      title: 'Our Projects',
+      title: 'Projects',
       description: 'Manage projects',
       icon: Briefcase,
       path: '/admin/portfolio',

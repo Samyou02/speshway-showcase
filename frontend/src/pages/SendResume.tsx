@@ -24,10 +24,49 @@ const SendResume = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validation
+    if (!formData.name.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Please enter your full name.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.email.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Please enter your email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email.trim())) {
+      toast({
+        title: "Validation Error",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.position.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Please specify the position you are applying for.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!selectedFile) {
       toast({
-        title: "Error",
-        description: "Please upload your resume.",
+        title: "Validation Error",
+        description: "Please upload your resume file.",
         variant: "destructive",
       });
       return;
@@ -36,25 +75,27 @@ const SendResume = () => {
     setIsUploading(true);
 
     const formDataToSend = new FormData();
-    formDataToSend.append("name", formData.name);
-    formDataToSend.append("email", formData.email);
-    formDataToSend.append("phone", formData.phone);
-    formDataToSend.append("subject", `Job Application - ${formData.position}`);
-    formDataToSend.append("message", formData.message);
+    formDataToSend.append("name", formData.name.trim());
+    formDataToSend.append("email", formData.email.trim());
+    formDataToSend.append("phone", formData.phone.trim());
+    formDataToSend.append("subject", formData.position.trim());
+    formDataToSend.append("message", formData.message.trim());
     formDataToSend.append("resume", selectedFile);
     formDataToSend.append("type", "resume");
 
     try {
-      await api.post("/contact/submit", formDataToSend, {
+      const response = await api.post("/contact/submit", formDataToSend, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
       toast({
-        title: "Success!",
-        description: "Your resume has been submitted successfully. We'll review it and get back to you soon.",
+        title: "Application Submitted Successfully!",
+        description: "Thank you for your interest. We have received your resume and will review it shortly. We'll get back to you soon.",
       });
+      
+      // Reset form
       setFormData({
         name: "",
         email: "",
@@ -63,10 +104,17 @@ const SendResume = () => {
         message: "",
       });
       setSelectedFile(null);
-    } catch (error) {
+      
+      // Reset file input
+      const fileInput = document.getElementById('resume-upload') as HTMLInputElement;
+      if (fileInput) {
+        fileInput.value = '';
+      }
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || "Failed to submit resume. Please try again.";
       toast({
-        title: "Error",
-        description: "Failed to submit resume. Please try again.",
+        title: "Submission Failed",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -210,38 +258,58 @@ const SendResume = () => {
                     <Upload size={16} className="inline mr-2" />
                     Upload Resume *
                   </label>
-                  <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
+                  <div className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                    selectedFile 
+                      ? 'border-primary bg-primary/5' 
+                      : 'border-border hover:border-primary/50'
+                  }`}>
                     <Input
                       type="file"
                       accept=".pdf,.doc,.docx"
                       onChange={handleFileChange}
                       className="hidden"
                       id="resume-upload"
+                      required
                     />
-                    <label htmlFor="resume-upload" className="cursor-pointer">
-                      <Upload className="mx-auto mb-2 text-muted-foreground" size={32} />
-                      <p className="text-muted-foreground mb-1">
-                        {selectedFile ? selectedFile.name : "Click to upload your resume"}
+                    <label htmlFor="resume-upload" className="cursor-pointer block">
+                      <Upload className={`mx-auto mb-2 ${selectedFile ? 'text-primary' : 'text-muted-foreground'}`} size={32} />
+                      <p className={`mb-1 ${selectedFile ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
+                        {selectedFile ? (
+                          <span className="flex items-center justify-center gap-2">
+                            <FileText size={16} />
+                            {selectedFile.name}
+                          </span>
+                        ) : (
+                          "Click to upload your resume"
+                        )}
                       </p>
                       <p className="text-sm text-muted-foreground">
                         PDF, DOC, DOCX (Max 5MB)
                       </p>
+                      {selectedFile && (
+                        <p className="text-xs text-primary mt-2">
+                          File selected: {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                        </p>
+                      )}
                     </label>
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">
-                    Cover Letter / Message
+                    Cover Letter / Additional Message (Optional)
                   </label>
                   <Textarea
                     name="message"
                     value={formData.message}
                     onChange={handleChange}
-                    placeholder="Tell us about yourself, your experience, and why you want to join our team..."
+                    placeholder="Tell us about yourself, your experience, and why you want to join our team... (Optional)"
                     rows={6}
                     className="bg-background/50 border-border focus:border-primary"
                   />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    This field is optional. You can provide additional information about yourself or your interest in the position.
+                  </p>
                 </div>
 
                 <Button

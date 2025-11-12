@@ -64,7 +64,7 @@ const Portfolio = () => {
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl mx-auto text-center animate-fade-in-up">
             <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6">
-              Our <span className="text-primary">Projects</span>
+              <span className="text-primary">Projects</span>
             </h1>
             <p className="text-xl text-muted-foreground">
               Showcasing our successful projects and the innovative solutions we've delivered for clients worldwide.

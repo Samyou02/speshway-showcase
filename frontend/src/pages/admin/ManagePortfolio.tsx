@@ -40,8 +40,13 @@ const ManagePortfolio = () => {
         'Content-Type': 'multipart/form-data',
       },
     }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['portfolios'] });
+    onSuccess: (response) => {
+      // Handle response data (axios wraps in .data)
+      const newProject = response.data?.data || response.data;
+      // Optimistically update the cache immediately - add at beginning (latest first)
+      queryClient.setQueryData(['portfolios'], (old: any) => {
+        return old ? [newProject, ...old] : [newProject];
+      });
       toast({ title: 'Project created successfully' });
       resetForm();
       setIsDialogOpen(false);
@@ -61,8 +66,13 @@ const ManagePortfolio = () => {
         'Content-Type': 'multipart/form-data',
       },
     }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['portfolios'] });
+    onSuccess: (response, variables) => {
+      // Handle response data (axios wraps in .data)
+      const updatedProject = response.data?.data || response.data;
+      // Optimistically update the cache immediately
+      queryClient.setQueryData(['portfolios'], (old: any) => {
+        return old ? old.map((item: any) => item._id === variables.id ? updatedProject : item) : [updatedProject];
+      });
       toast({ title: 'Project updated successfully' });
       resetForm();
       setIsDialogOpen(false);

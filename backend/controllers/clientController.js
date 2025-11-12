@@ -2,10 +2,15 @@ const Client = require('../models/Client');
 
 // @desc    Get all clients
 // @route   GET /api/clients
-// @access  Public
+// @access  Public (or Private/Admin if all=true query param)
 const getClients = async (req, res) => {
   try {
-    const clients = await Client.find({ isActive: true }).sort({ createdAt: -1 });
+    // If user is admin and requests all clients (including inactive)
+    // req.user will be set if protect middleware was used, otherwise undefined
+    const isAdmin = req.user && (req.user.role === 'admin' || req.user.role === 'hr');
+    const showAll = req.query.all === 'true' && isAdmin;
+    const query = showAll ? {} : { isActive: true };
+    const clients = await Client.find(query).sort({ createdAt: -1 });
     res.json(clients);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -32,10 +37,21 @@ const getClient = async (req, res) => {
 // @access  Private/Admin
 const createClient = async (req, res) => {
   try {
-    const client = new Client({
-      ...req.body,
-      updatedAt: Date.now()
-    });
+    // Validate required fields
+    if (!req.body.name || !req.body.name.trim()) {
+      return res.status(400).json({ message: 'Client name is required' });
+    }
+
+    // Clean up empty strings to use defaults
+    const clientData = {
+      name: req.body.name.trim(),
+      logo: req.body.logo?.trim() || '',
+      website: req.body.website?.trim() || '',
+      description: req.body.description?.trim() || '',
+      isActive: req.body.isActive !== undefined ? req.body.isActive : true
+    };
+
+    const client = new Client(clientData);
     const createdClient = await client.save();
     res.status(201).json(createdClient);
   } catch (error) {
@@ -53,8 +69,17 @@ const updateClient = async (req, res) => {
       return res.status(404).json({ message: 'Client not found' });
     }
 
-    Object.assign(client, req.body);
-    client.updatedAt = Date.now();
+    // Clean up empty strings
+    const updateData = {
+      name: req.body.name?.trim(),
+      logo: req.body.logo?.trim() || '',
+      website: req.body.website?.trim() || '',
+      description: req.body.description?.trim() || '',
+      isActive: req.body.isActive !== undefined ? req.body.isActive : client.isActive
+    };
+
+    Object.assign(client, updateData);
+    client.updatedAt = new Date();
     const updatedClient = await client.save();
     res.json(updatedClient);
   } catch (error) {

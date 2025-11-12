@@ -70,7 +70,17 @@ const Footer = () => {
               </li>
               <li>
                 <Link to="/portfolio" className="text-xs sm:text-sm text-muted-foreground hover:text-primary transition-colors duration-300 inline-block hover:translate-x-1">
-                  Our Projects
+                  Projects
+                </Link>
+              </li>
+              <li>
+                <Link to="/career" className="text-xs sm:text-sm text-muted-foreground hover:text-primary transition-colors duration-300 inline-block hover:translate-x-1">
+                  Career
+                </Link>
+              </li>
+              <li>
+                <Link to="/send-resume" className="text-xs sm:text-sm text-muted-foreground hover:text-primary transition-colors duration-300 inline-block hover:translate-x-1">
+                  Send Resume
                 </Link>
               </li>
             </ul>
@@ -111,7 +121,7 @@ const Footer = () => {
                   href="tel:+919100006020" 
                   className="text-xs sm:text-sm text-muted-foreground hover:text-primary transition-colors duration-300"
                 >
-                  +91 9100006020
+                  +91 9876543210
                 </a>
               </li>
               <li className="flex items-center space-x-2 sm:space-x-3">

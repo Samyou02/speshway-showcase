@@ -6,17 +6,12 @@ import {
   Calendar, 
   MapPin, 
   ExternalLink, 
-  Grid, 
-  List,
-  Filter,
-  ChevronLeft,
-  ChevronRight,
-  Sparkles,
   Award,
   Users,
   PartyPopper,
   Eye,
-  Image
+  Image,
+  Sparkles
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -41,89 +36,25 @@ interface GalleryItem {
   formattedDate?: string;
 }
 
-interface PaginationInfo {
-  currentPage: number;
-  totalPages: number;
-  totalItems: number;
-  itemsPerPage: number;
-  hasNext: boolean;
-  hasPrev: boolean;
-}
 
 const Gallery = () => {
   const { toast } = useToast();
   
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [searchTerm, setSearchTerm] = useState('');
   const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
-  const [pagination, setPagination] = useState<PaginationInfo>({
-    currentPage: 1,
-    totalPages: 1,
-    totalItems: 0,
-    itemsPerPage: 12,
-    hasNext: false,
-    hasPrev: false
-  });
-
-  const [categories, setCategories] = useState([
-    { value: 'all', label: 'All Categories', icon: Sparkles }
-  ]);
+  const [groupedItems, setGroupedItems] = useState<{ [key: string]: GalleryItem[] }>({});
 
   useEffect(() => {
-    fetchCategories();
     fetchGalleryItems();
   }, []);
 
-  useEffect(() => {
-    fetchGalleryItems();
-  }, [selectedCategory, pagination.currentPage]);
-
-  const fetchCategories = async () => {
-    try {
-      const response = await fetch(`${API_URL}/gallery/categories`);
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Failed to fetch categories' }));
-        throw new Error(errorData.message || 'Failed to fetch categories');
-      }
-      
-      const data = await response.json();
-      const categoryIcons: { [key: string]: any } = {
-        'Fests': PartyPopper,
-        'Awards': Award,
-        'Fun Activities': Users,
-        'Team Moments': Users
-      };
-      
-      const categoryOptions = [
-        { value: 'all', label: 'All Categories', icon: Sparkles },
-        ...data.data.map((category: string) => ({
-          value: category,
-          label: category,
-          icon: categoryIcons[category] || Users
-        }))
-      ];
-      
-      setCategories(categoryOptions);
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to fetch categories",
-        variant: "destructive"
-      });
-    }
-  };
 
   const fetchGalleryItems = async () => {
     try {
       setLoading(true);
-      const categoryParam = selectedCategory !== 'all' ? `&category=${selectedCategory}` : '';
-      const response = await fetch(
-        `${API_URL}/gallery?page=${pagination.currentPage}&limit=${pagination.itemsPerPage}${categoryParam}`
-      );
+      // Fetch all items without pagination or category filter
+      const response = await fetch(`${API_URL}/gallery?limit=1000`);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: 'Failed to fetch gallery items' }));
@@ -131,8 +62,19 @@ const Gallery = () => {
       }
 
       const data = await response.json();
-      setGalleryItems(data.data);
-      setPagination(data.pagination);
+      const items = data.data || [];
+      setGalleryItems(items);
+      
+      // Group items by category
+      const grouped: { [key: string]: GalleryItem[] } = {};
+      items.forEach((item: GalleryItem) => {
+        const category = item.category || 'Uncategorized';
+        if (!grouped[category]) {
+          grouped[category] = [];
+        }
+        grouped[category].push(item);
+      });
+      setGroupedItems(grouped);
     } catch (error) {
       console.error('Error fetching gallery items:', error);
       toast({
@@ -177,66 +119,7 @@ const Gallery = () => {
     e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xNzUgMTI1SDE1MFYxNzVIMTc1VjEyNVoiIGZpbGw9IiM5Q0EzQUYiLz4KPHBhdGggZD0iTTIyNSAxMjVIMjAwVjE3NUgyMjVWMTI1WiIgZmlsbD0iIzlDQTNBRiIvPgo8cGF0aCBkPSJNMTc1IDE3NUgxNTBWMjAwSDE3NVYxNzVaIiBmaWxsPSIjOUNBM0FGIi8+CjxwYXRoIGQ9Ik0yMjUgMTc1SDIwMFYyMDBIMjI1VjE3NVoiIGZpbGw9IiM5Q0EzQUYiLz4KPC9zdmc+';
   };
 
-  const handlePageChange = (newPage: number) => {
-    setPagination(prev => ({ ...prev, currentPage: newPage }));
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
   const GalleryCard = ({ item }: { item: GalleryItem }) => {
-    const CategoryIcon = getCategoryIcon(item.category);
-    
-    const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-      e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xNzUgMTI1SDE1MFYxNzVIMTc1VjEyNVoiIGZpbGw9IiM5Q0EzQUYiLz4KPHBhdGggZD0iTTIyNSAxMjVIMjAwVjE3NUgyMjVWMTI1WiIgZmlsbD0iIzlDQTNBRiIvPgo8cGF0aCBkPSJNMTc1IDE3NUgxNTBWMjAwSDE3NVYxNzVaIiBmaWxsPSIjOUNBM0FGIi8+CjxwYXRoIGQ9Ik0yMjUgMTc1SDIwMFYyMDBIMjI1VjE3NVoiIGZpbGw9IiM5Q0EzQUYiLz4KPC9zdmc+';
-    };
-    
-    if (viewMode === 'list') {
-      return (
-        <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
-          <div className="flex">
-            <div className="w-48 h-32 flex-shrink-0">
-              <img 
-                src={item.image.url} 
-                alt={item.title}
-                className="w-full h-full object-cover cursor-pointer"
-                onClick={() => setSelectedItem(item)}
-                onError={handleImageError}
-              />
-            </div>
-            <div className="flex-1 p-6">
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <Badge className={getCategoryColor(item.category)}>
-                    <CategoryIcon size={12} className="mr-1" />
-                    {item.category}
-                  </Badge>
-                </div>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => setSelectedItem(item)}
-                >
-                  <Eye size={16} />
-                </Button>
-              </div>
-              <h3 className="text-xl font-semibold mb-2 line-clamp-1">{item.title}</h3>
-              <p className="text-muted-foreground mb-3 line-clamp-2">{item.description}</p>
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                {item.location && (
-                  <div className="flex items-center gap-1">
-                    <MapPin size={14} />
-                    <span>{item.location}</span>
-                  </div>
-                )}
-                <div className="flex items-center gap-1">
-                  <Calendar size={14} />
-                  <span>{formatDate(item.date)}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
-      );
-    }
 
     return (
       <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-[1.02] group">
@@ -260,12 +143,6 @@ const Gallery = () => {
                 View Details
               </Button>
             </div>
-          </div>
-          <div className="absolute top-4 left-4">
-            <Badge className={getCategoryColor(item.category)}>
-              <CategoryIcon size={12} className="mr-1" />
-              {item.category}
-            </Badge>
           </div>
         </div>
         <CardHeader>
@@ -324,48 +201,6 @@ const Gallery = () => {
             <p className="text-xl text-muted-foreground mb-8">
               Explore our journey through memorable moments, achievements, and celebrations
             </p>
-            
-            {/* Category Filter */}
-            <div className="flex flex-wrap justify-center gap-3 mb-8">
-              {categories.map((category) => {
-                const Icon = category.icon;
-                return (
-                  <Button
-                    key={category.value}
-                    variant={selectedCategory === category.value ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => {
-                      setSelectedCategory(category.value);
-                      setPagination(prev => ({ ...prev, currentPage: 1 }));
-                    }}
-                    className="flex items-center gap-2"
-                  >
-                    <Icon size={16} />
-                    {category.label}
-                  </Button>
-                );
-              })}
-            </div>
-
-            {/* View Mode Toggle */}
-            <div className="flex justify-center items-center gap-2">
-              <Button
-                variant={viewMode === 'grid' ? "default" : "outline"}
-                size="sm"
-                onClick={() => setViewMode('grid')}
-              >
-                <Grid size={16} className="mr-2" />
-                Grid View
-              </Button>
-              <Button
-                variant={viewMode === 'list' ? "default" : "outline"}
-                size="sm"
-                onClick={() => setViewMode('list')}
-              >
-                <List size={16} className="mr-2" />
-                List View
-              </Button>
-            </div>
           </div>
         </div>
       </section>
@@ -378,16 +213,7 @@ const Gallery = () => {
               <LoadingSkeleton />
             ) : (
               <>
-                <div className={viewMode === 'grid' 
-                  ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12"
-                  : "space-y-6 mb-12"
-                }>
-                  {galleryItems.map((item) => (
-                    <GalleryCard key={item._id} item={item} />
-                  ))}
-                </div>
-
-                {galleryItems.length === 0 && (
+                {Object.keys(groupedItems).length === 0 ? (
                   <div className="text-center py-16">
                     <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
                       <Image className="w-12 h-12 text-primary" />
@@ -396,63 +222,33 @@ const Gallery = () => {
                       No gallery items found
                     </h3>
                     <p className="text-muted-foreground mb-6">
-                      {selectedCategory === 'all' 
-                        ? "Check back later for amazing content!"
-                        : `No items available in ${categories.find(c => c.value === selectedCategory)?.label}`
-                      }
+                      Check back later for amazing content!
                     </p>
-                    {selectedCategory !== 'all' && (
-                      <Button
-                        variant="outline"
-                        onClick={() => setSelectedCategory('all')}
-                      >
-                        View All Categories
-                      </Button>
-                    )}
                   </div>
-                )}
-
-                {/* Pagination */}
-                {pagination.totalPages > 1 && (
-                  <div className="flex justify-center items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handlePageChange(pagination.currentPage - 1)}
-                      disabled={!pagination.hasPrev}
-                    >
-                      <ChevronLeft size={16} />
-                      Previous
-                    </Button>
-                    
-                    <div className="flex items-center gap-1">
-                      {[...Array(pagination.totalPages)].map((_, i) => {
-                        const pageNum = i + 1;
-                        const isActive = pageNum === pagination.currentPage;
-                        
-                        return (
-                          <Button
-                            key={pageNum}
-                            variant={isActive ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => handlePageChange(pageNum)}
-                            className="min-w-10"
-                          >
-                            {pageNum}
-                          </Button>
-                        );
-                      })}
-                    </div>
-                    
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handlePageChange(pagination.currentPage + 1)}
-                      disabled={!pagination.hasNext}
-                    >
-                      Next
-                      <ChevronRight size={16} />
-                    </Button>
+                ) : (
+                  <div className="space-y-12">
+                    {Object.entries(groupedItems).map(([category, items]) => {
+                      const CategoryIcon = getCategoryIcon(category);
+                      return (
+                        <div key={category} className="space-y-6">
+                          <div className="flex items-center gap-3">
+                            <CategoryIcon className="w-6 h-6 text-primary" />
+                            <h2 className="text-3xl font-bold text-foreground">
+                              {category}
+                            </h2>
+                            <div className="flex-1 h-px bg-gradient-to-r from-primary/50 to-transparent"></div>
+                            <Badge className={getCategoryColor(category)}>
+                              {items.length} {items.length === 1 ? 'item' : 'items'}
+                            </Badge>
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            {items.map((item) => (
+                              <GalleryCard key={item._id} item={item} />
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </>

@@ -33,8 +33,13 @@ const ManageServices = () => {
 
   const createMutation = useMutation({
     mutationFn: (data) => api.post('/services', data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['services'] });
+    onSuccess: (response) => {
+      // Handle response data (axios wraps in .data)
+      const newService = response.data?.data || response.data;
+      // Optimistically update the cache immediately - add at beginning (latest first)
+      queryClient.setQueryData(['services'], (old: any) => {
+        return old ? [newService, ...old] : [newService];
+      });
       toast({ title: 'Service created successfully' });
       resetForm();
       setIsDialogOpen(false);
@@ -50,8 +55,13 @@ const ManageServices = () => {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) => api.put(`/services/${id}`, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['services'] });
+    onSuccess: (response, variables) => {
+      // Handle response data (axios wraps in .data)
+      const updatedService = response.data?.data || response.data;
+      // Optimistically update the cache immediately
+      queryClient.setQueryData(['services'], (old: any) => {
+        return old ? old.map((item: any) => item._id === variables.id ? updatedService : item) : [updatedService];
+      });
       toast({ title: 'Service updated successfully' });
       resetForm();
       setIsDialogOpen(false);

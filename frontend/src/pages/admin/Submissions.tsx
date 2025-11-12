@@ -6,41 +6,119 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { LogOut, ArrowLeft } from 'lucide-react';
+import { LogOut, ArrowLeft, Mail, Send, MessageSquare } from 'lucide-react';
 
 const Submissions = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
+  const [replyDialogOpen, setReplyDialogOpen] = useState<string | null>(null);
+  const [replyMessage, setReplyMessage] = useState('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['submissions', statusFilter, typeFilter],
-    queryFn: () => api.get('/contact/submissions').then(res => res.data.data || res.data || []),
+    queryFn: async () => {
+      try {
+        const response = await api.get('/contact/submissions');
+        const responseData = response.data;
+        // Handle different response structures
+        if (responseData.success && responseData.data) {
+          return responseData.data;
+        }
+        if (Array.isArray(responseData)) {
+          return responseData;
+        }
+        if (responseData.data && Array.isArray(responseData.data)) {
+          return responseData.data;
+        }
+        return [];
+      } catch (err: any) {
+        console.error('Error fetching submissions:', err);
+        throw err;
+      }
+    },
   });
 
   const updateStatusMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) =>
       api.put(`/contact/submission/${id}/status`, { status }),
-    onSuccess: () => {
+    onSuccess: (response, variables) => {
+      // Optimistically update the cache
+      queryClient.setQueryData(['submissions', statusFilter, typeFilter], (old: any) => {
+        if (!old) return old;
+        return old.map((submission: any) => 
+          submission._id === variables.id 
+            ? { ...submission, status: variables.status }
+            : submission
+        );
+      });
+      // Invalidate to refresh
       queryClient.invalidateQueries({ queryKey: ['submissions'] });
       toast({
         title: 'Status updated successfully',
         description: 'The submission status has been updated.',
       });
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
         title: 'Error updating status',
-        description: 'Failed to update the submission status.',
+        description: error.response?.data?.message || 'Failed to update the submission status.',
         variant: 'destructive',
       });
     },
   });
+
+  const replyMutation = useMutation({
+    mutationFn: ({ id, message }: { id: string; message: string }) =>
+      api.post(`/contact/submission/${id}/reply`, { message }),
+    onSuccess: (response, variables) => {
+      const updatedSubmission = response.data?.data || response.data;
+      // Optimistically update the cache
+      queryClient.setQueryData(['submissions', statusFilter, typeFilter], (old: any) => {
+        if (!old) return old;
+        return old.map((submission: any) => 
+          submission._id === variables.id 
+            ? updatedSubmission
+            : submission
+        );
+      });
+      // Invalidate to refresh
+      queryClient.invalidateQueries({ queryKey: ['submissions'] });
+      toast({
+        title: 'Reply sent successfully',
+        description: 'Your reply has been sent via email and saved.',
+      });
+      setReplyMessage('');
+      setReplyDialogOpen(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error sending reply',
+        description: error.response?.data?.message || 'Failed to send reply.',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const handleReply = (submissionId: string) => {
+    if (!replyMessage.trim()) {
+      toast({
+        title: 'Validation Error',
+        description: 'Please enter a reply message.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    replyMutation.mutate({ id: submissionId, message: replyMessage });
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -53,38 +131,43 @@ const Submissions = () => {
   };
 
   const filteredData = data?.filter((submission: any) => {
-    if (statusFilter !== 'all' && submission.status !== statusFilter) {
+    // Ensure status has a default value
+    const status = submission.status || 'new';
+    const type = submission.type || 'contact';
+    
+    if (statusFilter !== 'all' && status !== statusFilter) {
       return false;
     }
-    if (typeFilter !== 'all' && submission.type !== typeFilter) {
+    if (typeFilter !== 'all' && type !== typeFilter) {
       return false;
     }
     return true;
   }) || [];
 
   const getStatusBadge = (status: string) => {
-    switch (status) {
+    const statusValue = status || 'new';
+    switch (statusValue) {
       case 'new':
-        return <Badge variant="default">New</Badge>;
+        return <Badge variant="default" className="bg-primary text-primary-foreground">New</Badge>;
       case 'read':
         return <Badge variant="secondary">Read</Badge>;
       case 'replied':
         return <Badge variant="outline">Replied</Badge>;
       default:
-        return <Badge variant="secondary">{status}</Badge>;
+        return <Badge variant="secondary">{statusValue}</Badge>;
     }
   };
 
   const getTypeBadge = (type: string) => {
     switch (type) {
       case 'contact':
-        return <Badge color="primary">Contact</Badge>;
+        return <Badge variant="default" className="bg-primary text-primary-foreground">Contact</Badge>;
       case 'resume':
-        return <Badge color="secondary">Resume</Badge>;
+        return <Badge variant="secondary">Resume</Badge>;
       case 'message':
-        return <Badge color="info">Message</Badge>;
+        return <Badge variant="outline">Message</Badge>;
       default:
-        return <Badge>{type}</Badge>;
+        return <Badge variant="secondary">{type}</Badge>;
     }
   };
 
@@ -183,8 +266,8 @@ const Submissions = () => {
                             {submission.phone && <p className="text-sm text-muted-foreground">{submission.phone}</p>}
                           </div>
                           <div className="flex gap-2">
-                            {getTypeBadge(submission.type)}
-                            {getStatusBadge(submission.status)}
+                            {getTypeBadge(submission.type || 'contact')}
+                            {getStatusBadge(submission.status || 'new')}
                           </div>
                         </div>
                       </CardHeader>
@@ -200,23 +283,54 @@ const Submissions = () => {
                             <h4 className="font-medium text-sm">Message</h4>
                             <p className="text-sm text-muted-foreground">{submission.message}</p>
                           </div>
-                          {submission.resume && (
+                          {submission.resume && submission.resume.path && (
                             <div className="flex items-center gap-2">
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => window.open(`${getBaseUrl()}/${submission.resume.path}`, '_blank')}
+                                onClick={() => {
+                                  const resumePath = submission.resume.path.startsWith('http') 
+                                    ? submission.resume.path 
+                                    : `${getBaseUrl()}/${submission.resume.path}`;
+                                  window.open(resumePath, '_blank');
+                                }}
                               >
                                 View Resume
                               </Button>
                               <span className="text-xs text-muted-foreground">
-                                {submission.resume.originalName} ({(submission.resume.size / 1024 / 1024).toFixed(2)} MB)
+                                {submission.resume.originalName || submission.resume.filename || 'Resume'} 
+                                {submission.resume.size && ` (${(submission.resume.size / 1024 / 1024).toFixed(2)} MB)`}
                               </span>
                             </div>
                           )}
-                          <div className="flex items-center gap-2 pt-2">
+                          {/* Replies Section */}
+                          {submission.replies && submission.replies.length > 0 && (
+                            <div className="mt-4 pt-4 border-t border-border">
+                              <h4 className="font-medium text-sm mb-3 flex items-center gap-2">
+                                <MessageSquare size={16} className="text-primary" />
+                                Replies ({submission.replies.length})
+                              </h4>
+                              <div className="space-y-3">
+                                {submission.replies.map((reply: any, index: number) => (
+                                  <div key={index} className="bg-primary/5 border border-primary/20 rounded-lg p-3">
+                                    <div className="flex justify-between items-start mb-2">
+                                      <div>
+                                        <p className="text-sm font-medium text-foreground">{reply.repliedBy}</p>
+                                        <p className="text-xs text-muted-foreground">
+                                          {reply.repliedAt ? new Date(reply.repliedAt).toLocaleString() : 'N/A'}
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">{reply.message}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="flex items-center gap-2 pt-2 flex-wrap">
                             <Select
-                              value={submission.status}
+                              value={submission.status || 'new'}
                               onValueChange={(newStatus) => updateStatusMutation.mutate({ id: submission._id, status: newStatus })}
                             >
                               <SelectTrigger className="w-[120px]">
@@ -228,8 +342,95 @@ const Submissions = () => {
                                 <SelectItem value="replied">Replied</SelectItem>
                               </SelectContent>
                             </Select>
+                            
+                            <>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                className="flex items-center gap-2"
+                                onClick={() => {
+                                  setReplyDialogOpen(submission._id);
+                                  setReplyMessage('');
+                                }}
+                              >
+                                <Mail size={14} />
+                                Reply
+                              </Button>
+                              <Dialog 
+                                open={replyDialogOpen === submission._id} 
+                                onOpenChange={(open) => {
+                                  setReplyDialogOpen(open ? submission._id : null);
+                                  if (!open) setReplyMessage('');
+                                }}
+                              >
+                                <DialogContent className="max-w-2xl">
+                                <DialogHeader>
+                                  <DialogTitle>Reply to {submission.name}</DialogTitle>
+                                  <DialogDescription>
+                                    Send a reply to {submission.email}. The reply will be sent via email and saved.
+                                  </DialogDescription>
+                                </DialogHeader>
+                                <div className="space-y-4 py-4">
+                                  <div className="bg-muted/50 p-4 rounded-lg space-y-2">
+                                    <div>
+                                      <Label className="text-xs text-muted-foreground">Original Message</Label>
+                                      <p className="text-sm mt-1">{submission.message}</p>
+                                    </div>
+                                    {submission.subject && (
+                                      <div>
+                                        <Label className="text-xs text-muted-foreground">Subject</Label>
+                                        <p className="text-sm mt-1">{submission.subject}</p>
+                                      </div>
+                                    )}
+                                  </div>
+                                  
+                                  <div>
+                                    <Label htmlFor="reply-message">Your Reply</Label>
+                                    <Textarea
+                                      id="reply-message"
+                                      placeholder="Type your reply here..."
+                                      value={replyMessage}
+                                      onChange={(e) => setReplyMessage(e.target.value)}
+                                      className="min-h-[200px] mt-2"
+                                      rows={8}
+                                    />
+                                  </div>
+                                  
+                                  <div className="flex justify-end gap-2">
+                                    <Button
+                                      variant="outline"
+                                      onClick={() => {
+                                        setReplyDialogOpen(null);
+                                        setReplyMessage('');
+                                      }}
+                                    >
+                                      Cancel
+                                    </Button>
+                                    <Button
+                                      onClick={() => handleReply(submission._id)}
+                                      disabled={replyMutation.isPending || !replyMessage.trim()}
+                                      className="flex items-center gap-2"
+                                    >
+                                      {replyMutation.isPending ? (
+                                        <>
+                                          <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+                                          Sending...
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Send size={16} />
+                                          Send Reply
+                                        </>
+                                      )}
+                                    </Button>
+                                  </div>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+                            </>
+                            
                             <span className="text-xs text-muted-foreground">
-                              {new Date(submission.createdAt).toLocaleString()}
+                              {submission.createdAt ? new Date(submission.createdAt).toLocaleString() : 'N/A'}
                             </span>
                           </div>
                         </div>

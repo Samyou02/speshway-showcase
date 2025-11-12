@@ -183,13 +183,27 @@ const ManageGallery = () => {
         throw new Error(errorData.message || 'Failed to save gallery item');
       }
 
+      const savedItem = await response.json();
+      const itemData = savedItem.data || savedItem;
+
+      // Optimistically update the state immediately instead of refetching
+      if (editingItem) {
+        setGalleryItems(prev => prev.map(item => 
+          item._id === editingItem._id ? itemData : item
+        ));
+      } else {
+        // Add at beginning (latest first)
+        setGalleryItems(prev => [itemData, ...prev]);
+      }
+
       toast({
         title: "Success",
         description: editingItem ? "Gallery item updated successfully" : "Gallery item created successfully"
       });
 
       resetForm();
-      fetchGalleryItems();
+      // Only refetch if we need to refresh categories or other data
+      // fetchGalleryItems(); // Removed - using optimistic update instead
     } catch (error) {
       console.error('Error saving gallery item:', error);
       toast({
