@@ -283,16 +283,30 @@ const Submissions = () => {
                             <h4 className="font-medium text-sm">Message</h4>
                             <p className="text-sm text-muted-foreground">{submission.message}</p>
                           </div>
-                          {submission.resume && submission.resume.path && (
+                          {submission.resume && (
                             <div className="flex items-center gap-2">
                               <Button
                                 variant="outline"
                                 size="sm"
                                 onClick={() => {
-                                  const resumePath = submission.resume.path.startsWith('http') 
-                                    ? submission.resume.path 
-                                    : `${getBaseUrl()}/${submission.resume.path}`;
-                                  window.open(resumePath, '_blank');
+                                  const baseUrl = getBaseUrl();
+                                  const urlField = submission.resume.url as string | undefined;
+                                  const fileName = (submission.resume.filename as string | undefined) || undefined;
+                                  const rawPath = (submission.resume.path as string | undefined) || undefined;
+                                  let relativeUrl = '';
+                                  if (urlField && typeof urlField === 'string') {
+                                    relativeUrl = urlField;
+                                  } else if (fileName && typeof fileName === 'string') {
+                                    relativeUrl = `/uploads/${fileName}`;
+                                  } else if (rawPath && typeof rawPath === 'string') {
+                                    const parts = rawPath.split(/\\|\//);
+                                    const last = parts[parts.length - 1];
+                                    relativeUrl = `/uploads/${last}`;
+                                  }
+                                  const finalUrl = relativeUrl.startsWith('http') 
+                                    ? relativeUrl 
+                                    : `${baseUrl}${relativeUrl.startsWith('/') ? '' : '/'}${relativeUrl}`;
+                                  window.open(finalUrl, '_blank');
                                 }}
                               >
                                 View Resume

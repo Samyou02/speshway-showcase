@@ -101,7 +101,8 @@ const submitContact = async (req, res) => {
         originalName: req.file.originalname,
         mimetype: req.file.mimetype,
         size: req.file.size,
-        path: req.file.path
+        path: req.file.path,
+        url: `/uploads/${req.file.filename}`
       };
     }
 

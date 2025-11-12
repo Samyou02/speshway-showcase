@@ -32,7 +32,8 @@ const contactSchema = new mongoose.Schema({
     originalName: String,
     mimetype: String,
     size: Number,
-    path: String
+    path: String,
+    url: String
   },
   type: {
     type: String,
