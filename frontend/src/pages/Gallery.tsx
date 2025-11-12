@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   Calendar, 
   MapPin, 
@@ -34,6 +35,7 @@ interface GalleryItem {
     publicId: string;
   };
   formattedDate?: string;
+  createdAt?: string;
 }
 
 
@@ -44,9 +46,21 @@ const Gallery = () => {
   const [loading, setLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
   const [groupedItems, setGroupedItems] = useState<{ [key: string]: GalleryItem[] }>({});
+  const [categories, setCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedStatus, setSelectedStatus] = useState<string>('all');
+  const [readIds, setReadIds] = useState<Set<string>>(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('galleryReadIds') || '[]');
+      return new Set(Array.isArray(saved) ? saved : []);
+    } catch {
+      return new Set<string>();
+    }
+  });
 
   useEffect(() => {
     fetchGalleryItems();
+    fetchCategories();
   }, []);
 
 
@@ -64,17 +78,7 @@ const Gallery = () => {
       const data = await response.json();
       const items = data.data || [];
       setGalleryItems(items);
-      
-      // Group items by category
-      const grouped: { [key: string]: GalleryItem[] } = {};
-      items.forEach((item: GalleryItem) => {
-        const category = item.category || 'Uncategorized';
-        if (!grouped[category]) {
-          grouped[category] = [];
-        }
-        grouped[category].push(item);
-      });
-      setGroupedItems(grouped);
+      recomputeGroups(items, selectedCategory, selectedStatus, readIds);
     } catch (error) {
       console.error('Error fetching gallery items:', error);
       toast({
@@ -86,6 +90,53 @@ const Gallery = () => {
       setLoading(false);
     }
   };
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch(`${API_URL}/gallery/categories`);
+      if (!response.ok) return;
+      const data = await response.json();
+      const list: string[] = data.data || [];
+      setCategories(list);
+    } catch {}
+  };
+
+  const isNewItem = (item: GalleryItem) => {
+    const dateStr = item.createdAt || item.date;
+    if (!dateStr) return false;
+    const itemDate = new Date(dateStr).getTime();
+    const days30 = 30 * 24 * 60 * 60 * 1000;
+    return Date.now() - itemDate <= days30;
+  };
+
+  const recomputeGroups = (
+    items: GalleryItem[],
+    categoryFilter: string,
+    statusFilter: string,
+    readSet: Set<string>
+  ) => {
+    const filtered = items.filter((item) => {
+      const categoryMatch = categoryFilter === 'all' || (item.category || 'Uncategorized') === categoryFilter;
+      let statusMatch = true;
+      if (statusFilter === 'new') statusMatch = isNewItem(item);
+      else if (statusFilter === 'read') statusMatch = readSet.has(item._id);
+      else if (statusFilter === 'unread') statusMatch = !readSet.has(item._id);
+      return categoryMatch && statusMatch;
+    });
+
+    const grouped: { [key: string]: GalleryItem[] } = {};
+    filtered.forEach((item: GalleryItem) => {
+      const category = item.category || 'Uncategorized';
+      if (!grouped[category]) grouped[category] = [];
+      grouped[category].push(item);
+    });
+    setGroupedItems(grouped);
+  };
+
+  useEffect(() => {
+    recomputeGroups(galleryItems, selectedCategory, selectedStatus, readIds);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCategory, selectedStatus, readIds, galleryItems]);
 
   const getCategoryColor = (category: string) => {
     const colors = {
@@ -128,7 +179,13 @@ const Gallery = () => {
             src={item.image.url} 
             alt={item.title}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 cursor-pointer"
-            onClick={() => setSelectedItem(item)}
+            onClick={() => {
+              setSelectedItem(item);
+              const next = new Set(readIds);
+              next.add(item._id);
+              setReadIds(next);
+              localStorage.setItem('galleryReadIds', JSON.stringify(Array.from(next)));
+            }}
             onError={handleImageError}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -136,7 +193,13 @@ const Gallery = () => {
               <Button
                 size="sm"
                 variant="secondary"
-                onClick={() => setSelectedItem(item)}
+                onClick={() => {
+                  setSelectedItem(item);
+                  const next = new Set(readIds);
+                  next.add(item._id);
+                  setReadIds(next);
+                  localStorage.setItem('galleryReadIds', JSON.stringify(Array.from(next)));
+                }}
                 className="w-full"
               >
                 <Eye size={16} className="mr-2" />
@@ -209,6 +272,37 @@ const Gallery = () => {
       <section className="pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-7xl mx-auto">
+            <div className="flex flex-col md:flex-row gap-4 md:items-center md:justify-between mb-6">
+              <div className="flex gap-4 flex-wrap">
+                <div className="w-[220px]">
+                  <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Filter by status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Status</SelectItem>
+                      <SelectItem value="new">New</SelectItem>
+                      <SelectItem value="unread">Unread</SelectItem>
+                      <SelectItem value="read">Read</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="w-[220px]">
+                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Filter by type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Types</SelectItem>
+                      {categories.map((cat) => (
+                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
             {loading ? (
               <LoadingSkeleton />
             ) : (
