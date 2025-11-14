@@ -64,10 +64,10 @@ const Navbar = () => {
               />
               <span className="absolute inset-0 rounded-none ring-0 group-hover:ring-2 ring-primary/30 transition-all animate-glow" />
             </div>
-            <span className="text-sm sm:text-lg md:text-xl font-bold text-foreground hidden sm:inline-block" style={{ fontFamily: 'Times New Roman, serif' }}>
+            <span className="text-sm sm:text-lg md:text-xl font-bold text-white hidden sm:inline-block" style={{ fontFamily: 'Times New Roman, serif' }}>
               <span className="hidden md:inline">SPESHWAY SOLUTIONS PRIVATE LIMITED</span>
               <span className="md:hidden">SPESHWAY</span>
-              <span className="text-primary">.</span>
+              <span className="text-white">.</span>
             </span>
           </Link>
 
@@ -82,23 +82,23 @@ const Navbar = () => {
                   navigate(link.path);
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                className={`relative px-3 py-2 text-sm font-medium transition-all duration-300 ease-out group hover:-translate-y-0.5 ${
+                className={`relative px-3 py-2 text-sm font-medium transition-all duration-300 ease-out group hover:-translate-y-0.5 text-white hover:text-white/90 ${
                   isActive(link.path)
-                    ? "text-primary"
-                    : "text-muted-foreground hover:text-foreground"
+                    ? "text-white"
+                    : "text-white/80 hover:text-white"
                 }`}
               >
                 <span className="relative z-10">{link.label}</span>
                 {/* Active underline */}
                 <span
-                  className={`absolute bottom-0 left-0 right-0 h-0.5 bg-primary transform origin-left transition-all duration-300 ${
+                  className={`absolute bottom-0 left-0 right-0 h-0.5 bg-white transform origin-left transition-all duration-300 ${
                     isActive(link.path) 
                       ? "scale-x-100 opacity-100" 
                       : "scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-100"
                   }`}
                 />
                 {/* Hover background effect */}
-                <span className="absolute inset-0 bg-primary/5 rounded-md scale-0 group-hover:scale-100 transition-transform duration-300 origin-center opacity-0 group-hover:opacity-100" />
+                <span className="absolute inset-0 bg-white/10 rounded-md scale-0 group-hover:scale-100 transition-transform duration-300 origin-center opacity-0 group-hover:opacity-100" />
               </Link>
             ))}
             {adminLinks.map((link) => (
@@ -109,15 +109,15 @@ const Navbar = () => {
                   e.preventDefault();
                   navigate(link.path);
                 }}
-                className={`relative px-3 py-2 text-sm font-medium transition-all duration-300 ease-out group ${
+                className={`relative px-3 py-2 text-sm font-medium transition-all duration-300 ease-out group text-white hover:text-white/90 ${
                   isActive(link.path)
-                    ? "text-primary"
-                    : "text-muted-foreground hover:text-foreground"
+                    ? "text-white"
+                    : "text-white/80 hover:text-white"
                 }`}
               >
                 <span className="relative z-10">{link.label}</span>
                 <span
-                  className={`absolute bottom-0 left-0 right-0 h-0.5 bg-primary transform origin-left transition-all duration-300 ${
+                  className={`absolute bottom-0 left-0 right-0 h-0.5 bg-white transform origin-left transition-all duration-300 ${
                     isActive(link.path) 
                       ? "scale-x-100 opacity-100" 
                       : "scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-100"
@@ -140,14 +140,14 @@ const Navbar = () => {
 
           {/* Mobile Menu Button */}
           <button
-            className="lg:hidden text-foreground p-2 rounded-lg hover:bg-secondary/50 transition-all duration-300 active:scale-95"
+            className="lg:hidden text-white p-2 rounded-lg hover:bg-white/20 transition-all duration-300 active:scale-95"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle menu"
           >
             {isMobileMenuOpen ? (
-              <X size={24} className="transition-transform duration-300 rotate-0" />
+              <X size={24} className="transition-transform duration-300 rotate-0 text-white" />
             ) : (
-              <Menu size={24} className="transition-transform duration-300" />
+              <Menu size={24} className="transition-transform duration-300 text-white" />
             )}
           </button>
         </div>
@@ -175,8 +175,8 @@ const Navbar = () => {
                     : "translate-x-full opacity-0"
                 } ${
                   isActive(link.path)
-                    ? "text-primary bg-primary/10 border-l-2 border-primary"
-                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/50 active:bg-secondary/70"
+                    ? "text-white bg-white/20 border-l-2 border-white"
+                    : "text-white/80 hover:text-white hover:bg-white/10 active:bg-white/20"
                 }`}
                 style={{ 
                   transitionDelay: isMobileMenuOpen ? `${index * 0.05}s` : '0s'
@@ -200,8 +200,8 @@ const Navbar = () => {
                     : "translate-x-full opacity-0"
                 } ${
                   isActive(link.path)
-                    ? "text-primary bg-primary/10 border-l-2 border-primary"
-                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/50 active:bg-secondary/70"
+                    ? "text-white bg-white/20 border-l-2 border-white"
+                    : "text-white/80 hover:text-white hover:bg-white/10 active:bg-white/20"
                 }`}
                 style={{ 
                   transitionDelay: isMobileMenuOpen ? `${(navLinks.length + index) * 0.05}s` : '0s'

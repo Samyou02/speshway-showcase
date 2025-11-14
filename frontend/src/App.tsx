@@ -26,6 +26,7 @@ const ManagePortfolio = lazy(() => import("./pages/admin/ManagePortfolio"));
 const ManageTeam = lazy(() => import("./pages/admin/ManageTeam"));
 const ManageGallery = lazy(() => import("./pages/admin/ManageGallery"));
 const ManageClients = lazy(() => import("./pages/admin/ManageClients"));
+const ManageHomeImages = lazy(() => import("./pages/admin/ManageHomeImages"));
 
 const PageLoader = () => (
   <div className="flex items-center justify-center min-h-screen">
@@ -59,6 +60,7 @@ const App = () => (
             <Route path="/admin/gallery" element={<ManageGallery />} />
             <Route path="/admin/clients" element={<ManageClients />} />
             <Route path="/admin/submissions" element={<Submissions />} />
+            <Route path="/admin/home-images" element={<ManageHomeImages />} />
             <Route path="/admin" element={<AdminLogin />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

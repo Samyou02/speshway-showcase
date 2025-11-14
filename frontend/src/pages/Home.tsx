@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Code, Zap, Shield, TrendingUp } from "lucide-react";
+import { ArrowRight, Code, Zap, Shield, TrendingUp, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Navbar from "@/components/Navbar";
@@ -8,6 +8,7 @@ import heroImage from "@/assets/hero-bg.png";
 import { FadeIn, StaggerContainer, StaggerItem, HoverScale } from "@/components/animations";
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
+import { useState, useEffect } from 'react';
 
 const Home = () => {
   const { data: clients } = useQuery({
@@ -18,6 +19,75 @@ const Home = () => {
       return Array.isArray(data) ? data : (data?.data || data || []);
     }),
   });
+
+  const { data: homeImages, error: homeImagesError, refetch: refetchHomeImages } = useQuery({
+    queryKey: ['home-images'],
+    queryFn: async () => {
+      try {
+        const res = await api.get('/home-images');
+        console.log('Home images API response:', res.data);
+        const data = res.data;
+        // Handle response structure: { success: true, data: [...] } or direct array
+        const images = Array.isArray(data) ? data : (data?.data || []);
+        console.log('Processed home images:', images);
+        // Sort by order
+        const sorted = images.sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
+        console.log('Sorted images:', sorted);
+        return sorted;
+      } catch (error) {
+        console.error('Error fetching home images:', error);
+        throw error;
+      }
+    },
+    retry: 1,
+    refetchOnWindowFocus: true,
+    staleTime: 30000, // Consider data stale after 30 seconds
+  });
+
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+
+  // Filter active images - handle both isActive being true or undefined (defaults to true)
+  const activeImages = (homeImages || []).filter((img: any) => {
+    // Include image if isActive is true or undefined (defaults to true in model)
+    return img.isActive !== false;
+  });
+  const hasImages = activeImages.length > 0;
+
+  // Debug logging
+  useEffect(() => {
+    if (homeImagesError) {
+      console.error('Home images error:', homeImagesError);
+    }
+    console.log('Home images:', homeImages);
+    console.log('Active images:', activeImages);
+    console.log('Has images:', hasImages);
+  }, [homeImages, activeImages, hasImages, homeImagesError]);
+
+  useEffect(() => {
+    if (!hasImages || !isAutoPlaying) return;
+
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % activeImages.length);
+    }, 5000); // Change image every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [hasImages, isAutoPlaying, activeImages.length]);
+
+  const goToPrevious = () => {
+    setIsAutoPlaying(false);
+    setCurrentImageIndex((prev) => (prev - 1 + activeImages.length) % activeImages.length);
+  };
+
+  const goToNext = () => {
+    setIsAutoPlaying(false);
+    setCurrentImageIndex((prev) => (prev + 1) % activeImages.length);
+  };
+
+  const goToSlide = (index: number) => {
+    setIsAutoPlaying(false);
+    setCurrentImageIndex(index);
+  };
 
   const features = [
     {
@@ -46,17 +116,91 @@ const Home = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
-        <div
-          className="absolute inset-0 z-0"
-          style={{
-            backgroundImage: `url(${heroImage})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            filter: "brightness(0.4) saturate(0.8)",
-          }}
-        />
-        <div className="absolute inset-0 z-0 bg-gradient-to-b from-primary/10 via-background/80 to-background" />
+      <section className="relative w-full flex items-center justify-center overflow-hidden" style={{ height: '100vh', minHeight: '100vh' }}>
+        {/* Image Carousel */}
+        {hasImages && activeImages.length > 0 ? (
+          <>
+            {activeImages.map((image: any, index: number) => (
+              <div
+                key={image._id || index}
+                className={`absolute inset-0 z-0 transition-opacity duration-1000 ${
+                  index === currentImageIndex ? 'opacity-100' : 'opacity-0'
+                }`}
+              >
+                <img
+                  src={image.image?.url || image.url}
+                  alt={image.title || 'Home carousel image'}
+                  className="w-full h-full object-cover object-center"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    objectPosition: 'center'
+                  }}
+                  onError={(e) => {
+                    console.error('Image load error:', image);
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-background/80 to-background" />
+              </div>
+            ))}
+          </>
+        ) : (
+          <>
+            <div
+              className="absolute inset-0 z-0"
+              style={{
+                backgroundImage: `url(${heroImage})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                filter: "brightness(0.4) saturate(0.8)",
+                width: '100%',
+                height: '100%',
+              }}
+            />
+            <div className="absolute inset-0 z-0 bg-gradient-to-b from-primary/10 via-background/80 to-background" />
+          </>
+        )}
+
+        {/* Navigation Arrows */}
+        {hasImages && activeImages.length > 1 && (
+          <>
+            <button
+              onClick={goToPrevious}
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 transition-all duration-300"
+              aria-label="Previous image"
+            >
+              <ChevronLeft className="text-white" size={24} />
+            </button>
+            <button
+              onClick={goToNext}
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 transition-all duration-300"
+              aria-label="Next image"
+            >
+              <ChevronRight className="text-white" size={24} />
+            </button>
+          </>
+        )}
+
+        {/* Dots Indicator */}
+        {hasImages && activeImages.length > 1 && (
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+            {activeImages.map((_: any, index: number) => (
+              <button
+                key={index}
+                onClick={() => goToSlide(index)}
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  index === currentImageIndex
+                    ? 'bg-white w-8'
+                    : 'bg-white/50 hover:bg-white/75'
+                }`}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
+        )}
+
         <div className="container mx-auto px-4 relative z-10">
           <FadeIn delay={0.2} duration={0.8}>
             <div className="max-w-4xl mx-auto text-center space-y-8">

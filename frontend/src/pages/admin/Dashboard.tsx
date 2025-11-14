@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Settings, Briefcase, Users, LogOut, FileText, Image, Building2 } from 'lucide-react';
+import { Settings, Briefcase, Users, LogOut, FileText, Image, Building2, Home } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useToast } from '@/hooks/use-toast';
@@ -62,6 +62,13 @@ const Dashboard = () => {
       icon: FileText,
       path: '/admin/submissions',
       color: 'from-orange-500/20 to-red-500/20'
+    },
+    {
+      title: 'Home Images',
+      description: 'Manage home page carousel images',
+      icon: Home,
+      path: '/admin/home-images',
+      color: 'from-blue-500/20 to-indigo-500/20'
     }
   ];
 
