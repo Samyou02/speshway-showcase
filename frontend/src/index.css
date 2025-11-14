@@ -10,41 +10,41 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 222 47% 11%;
-    --foreground: 210 40% 98%;
+    --background: 0 0% 100%;
+    --foreground: 217 33% 17%;
 
-    --card: 224 30% 15%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 217 33% 17%;
 
-    --popover: 224 30% 15%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 217 33% 17%;
 
-    --primary: 180 100% 50%;
-    --primary-foreground: 222 47% 11%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 240 60% 25%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 217 70% 40%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 224 20% 25%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 217 20% 95%;
+    --muted-foreground: 217 15% 45%;
 
-    --accent: 280 70% 60%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 199 89% 48%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 224 30% 20%;
-    --input: 224 30% 18%;
-    --ring: 180 100% 50%;
+    --border: 217 20% 85%;
+    --input: 217 20% 95%;
+    --ring: 217 91% 60%;
 
     --radius: 0.75rem;
 
-    --glow-primary: 180 100% 50%;
-    --glow-secondary: 280 70% 60%;
+    --glow-primary: 217 91% 60%;
+    --glow-secondary: 199 89% 48%;
     
-    --gradient-hero: linear-gradient(135deg, hsl(222 47% 8%), hsl(240 60% 15%));
-    --gradient-card: linear-gradient(135deg, hsl(224 30% 15% / 0.8), hsl(240 60% 20% / 0.6));
+    --gradient-hero: linear-gradient(135deg, hsl(217 91% 60%), hsl(199 89% 48%));
+    --gradient-card: linear-gradient(135deg, hsl(217 91% 60% / 0.1), hsl(199 89% 48% / 0.1));
   }
 }
 
@@ -89,14 +89,14 @@ All colors MUST be HSL.
   }
 
   .text-gradient {
-    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent;
   }
 
   .shimmer-effect {
     background: linear-gradient(
       90deg,
       transparent 0%,
-      rgba(255, 255, 255, 0.1) 50%,
+      rgba(59, 130, 246, 0.1) 50%,
       transparent 100%
     );
     background-size: 1000px 100%;

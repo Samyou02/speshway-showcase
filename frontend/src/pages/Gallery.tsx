@@ -141,12 +141,12 @@ const Gallery = () => {
 
   const getCategoryColor = (category: string) => {
     const colors = {
-      'Fests': 'bg-gradient-to-r from-purple-500 to-pink-500 text-white',
-      'Awards': 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white',
-      'Fun Activities': 'bg-gradient-to-r from-green-500 to-teal-500 text-white',
-      'Team Moments': 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white'
+      'Fests': 'bg-gradient-to-r from-blue-500 to-blue-600 text-white',
+      'Awards': 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white',
+      'Fun Activities': 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white',
+      'Team Moments': 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white'
     };
-    return colors[category as keyof typeof colors] || 'bg-gradient-to-r from-gray-500 to-gray-600 text-white';
+    return colors[category as keyof typeof colors] || 'bg-gradient-to-r from-blue-500 to-blue-600 text-white';
   };
 
   const getCategoryIcon = (category: string) => {

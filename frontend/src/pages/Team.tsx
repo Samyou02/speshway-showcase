@@ -137,7 +137,7 @@ const Team = () => {
       </section>
 
       {/* Culture Section */}
-      <section className="py-12 sm:py-16 md:py-20 bg-secondary/20">
+      <section className="py-12 sm:py-16 md:py-20 bg-primary/5">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-8 sm:mb-10 md:mb-12 animate-fade-in-up">

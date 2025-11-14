@@ -2,11 +2,11 @@ import { ThemeConfig } from 'antd';
 
 export const antdTheme: ThemeConfig = {
   token: {
-    colorPrimary: '#00ffff',
+    colorPrimary: '#3b82f6',
     colorSuccess: '#52c41a',
     colorWarning: '#faad14',
     colorError: '#ff4d4f',
-    colorInfo: '#1890ff',
+    colorInfo: '#0ea5e9',
     borderRadius: 8,
     wireframe: false,
     fontFamily: 'inherit',

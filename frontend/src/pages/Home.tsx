@@ -53,10 +53,10 @@ const Home = () => {
             backgroundImage: `url(${heroImage})`,
             backgroundSize: "cover",
             backgroundPosition: "center",
-            filter: "brightness(0.3)",
+            filter: "brightness(0.4) saturate(0.8)",
           }}
         />
-        <div className="absolute inset-0 z-0 bg-gradient-to-b from-background/50 via-background/70 to-background" />
+        <div className="absolute inset-0 z-0 bg-gradient-to-b from-primary/10 via-background/80 to-background" />
         <div className="container mx-auto px-4 relative z-10">
           <FadeIn delay={0.2} duration={0.8}>
             <div className="max-w-4xl mx-auto text-center space-y-8">
@@ -100,7 +100,7 @@ const Home = () => {
         <div className="absolute bottom-20 left-10 w-20 h-20 bg-primary/20 rounded-full blur-3xl animate-float" />
         <div className="absolute top-40 right-20 w-32 h-32 bg-accent/20 rounded-full blur-3xl animate-float" style={{ animationDelay: "2s" }} />
       </section>
-      <section className="py-20 bg-secondary/20">
+      <section className="py-20 bg-primary/5">
         <div className="container mx-auto px-4">
           <StaggerContainer staggerDelay={0.15}>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
@@ -160,7 +160,7 @@ const Home = () => {
           </StaggerContainer>
         </div>
       </section>
-      <section className="py-20 bg-secondary/20">
+      <section className="py-20 bg-primary/5">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-foreground mb-4">Our Trusted Clients</h2>
