@@ -2,6 +2,7 @@ import { Target, Eye, Award, Users } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { ScrollReveal } from "@/components/animations";
 
 const About = () => {
   const values = [
@@ -46,7 +47,8 @@ const About = () => {
       <section className="pt-32 pb-20 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent" />
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-3xl mx-auto text-center animate-fade-in-up">
+          <ScrollReveal>
+          <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6">
               About <span className="text-primary">Speshway Solutions</span>
             </h1>
@@ -55,6 +57,7 @@ const About = () => {
               we're your technology partners in success.
             </p>
           </div>
+          </ScrollReveal>
         </div>
       </section>
 

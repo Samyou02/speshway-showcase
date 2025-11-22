@@ -50,7 +50,7 @@ const Footer = () => {
           </div>
 
           {/* Quick Links */}
-          <div className="animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
+          <div className="animate-fade-in-up [animation-delay:.1s]">
             <h3 className="text-base sm:text-lg font-semibold text-foreground mb-3 sm:mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li>
@@ -87,7 +87,7 @@ const Footer = () => {
           </div>
 
           {/* Services */}
-          <div className="animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
+          <div className="animate-fade-in-up [animation-delay:.2s]">
             <h3 className="text-base sm:text-lg font-semibold text-foreground mb-3 sm:mb-4">Services</h3>
             <ul className="space-y-2">
               {["Web Development", "Mobile Apps", "Cloud Solutions", "AI & ML"].map((service, index) => (
@@ -101,7 +101,7 @@ const Footer = () => {
           </div>
 
           {/* Contact Info */}
-          <div className="animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
+          <div className="animate-fade-in-up [animation-delay:.3s]">
             <h3 className="text-base sm:text-lg font-semibold text-foreground mb-3 sm:mb-4">Contact</h3>
             <ul className="space-y-2 sm:space-y-3">
               <li className="flex items-start space-x-2 sm:space-x-3">

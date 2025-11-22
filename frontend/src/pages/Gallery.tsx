@@ -19,7 +19,7 @@ import Footer from '@/components/Footer';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
-import { FadeIn, StaggerContainer, StaggerItem, HoverScale } from '@/components/animations';
+import { FadeIn, StaggerContainer, StaggerItem, HoverScale, ScrollReveal } from '@/components/animations';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
@@ -258,7 +258,7 @@ const Gallery = () => {
       {/* Hero Section */}
       <section className="pt-32 pb-16">
         <div className="container mx-auto px-4">
-          <FadeIn>
+          <ScrollReveal>
             <div className="max-w-4xl mx-auto text-center mb-12">
               <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent mb-6">
                 Our Gallery
@@ -267,7 +267,7 @@ const Gallery = () => {
                 Explore our journey through memorable moments, achievements, and celebrations
               </p>
             </div>
-          </FadeIn>
+          </ScrollReveal>
         </div>
       </section>
 

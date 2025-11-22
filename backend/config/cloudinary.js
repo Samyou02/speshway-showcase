@@ -16,9 +16,12 @@ const createCloudinaryStorage = (folder) => {
         {
           folder: folder,
           resource_type: 'image',
-          transformation: folder === 'speshway/portfolios' 
-            ? [{ width: 1200, height: 800, crop: 'limit', quality: 'auto' }]
-            : [{ width: 500, height: 500, crop: 'fill', gravity: 'face', quality: 'auto' }],
+          transformation:
+            folder === 'speshway/portfolios'
+              ? [{ width: 1200, height: 800, crop: 'limit', quality: 'auto' }]
+              : folder === 'speshway/home'
+              ? [{ width: 1600, height: 900, crop: 'fill', gravity: 'center', quality: 'auto' }]
+              : [{ width: 500, height: 500, crop: 'fill', gravity: 'face', quality: 'auto' }],
         },
         (error, result) => {
           if (error) {

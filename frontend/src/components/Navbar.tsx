@@ -52,104 +52,102 @@ const Navbar = () => {
           : "bg-transparent"
       }`}
     >
-      <div className="container mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between h-16 sm:h-20">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2 group">
-            <div className="relative p-1 rounded-none bg-card/40 border border-border shadow-sm transition-transform duration-300 group-hover:scale-105">
-              <img
-                src="/logo.png"
-                alt="Speshway Logo"
-                className="w-12 h-12 sm:w-14 sm:h-14 rounded-none"
-              />
-              <span className="absolute inset-0 rounded-none ring-0 group-hover:ring-2 ring-primary/30 transition-all animate-glow" />
+      <div className="container mx-auto px-4 sm:px-6 py-1">
+        {/* Top Row: Logo + Brand, Mobile Menu Toggle */}
+        <div className="flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-3">
+            <img
+              src="/logo.png"
+              alt="Speshway Logo"
+              className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
+            />
+            <div className="leading-tight">
+              <span className="block text-sm sm:text-base md:text-lg font-bold text-foreground uppercase">
+                Speshway Solutions</span>
+
+              <span className="block text-[10px] sm:text-[11px] md:text-xs text-muted-foreground uppercase">
+                Private Limited
+              </span>
             </div>
-            <span className="text-sm sm:text-lg md:text-xl font-bold text-foreground hidden sm:inline-block" style={{ fontFamily: 'Times New Roman, serif' }}>
-              <span className="hidden md:inline">SPESHWAY SOLUTIONS PRIVATE LIMITED</span>
-              <span className="md:hidden">SPESHWAY</span>
-              <span className="text-primary">.</span>
-            </span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-4 xl:space-x-6">
-            {navLinks.map((link, index) => (
-              <Link
-                key={link.path}
-                to={link.path}
+          <div className="flex items-center gap-2">
+            <div className="hidden lg:flex items-center gap-2 xl:gap-4">
+              {navLinks.map((link, index) => (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate(link.path);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className={`relative px-2 py-1.5 text-sm font-medium transition-all duration-300 ease-out group hover:-translate-y-0.5 animate-fade-in-up ${
+                    isActive(link.path)
+                      ? "text-primary"
+                      : "text-muted-foreground hover:text-foreground"
+                  } ${index === 0 ? "[animation-delay:0s]" : index === 1 ? "[animation-delay:.05s]" : index === 2 ? "[animation-delay:.1s]" : index === 3 ? "[animation-delay:.15s]" : index === 4 ? "[animation-delay:.2s]" : index === 5 ? "[animation-delay:.25s]" : index === 6 ? "[animation-delay:.3s]" : "[animation-delay:.35s]"}`}
+                >
+                  <span className="relative z-10">{link.label}</span>
+                  <span
+                    className={`absolute bottom-0 left-0 right-0 h-0.5 bg-primary transform origin-left transition-all duration-300 ${
+                      isActive(link.path) 
+                        ? "scale-x-100 opacity-100" 
+                        : "scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-100"
+                    }`}
+                  />
+                  <span className="absolute inset-0 bg-primary/5 rounded-md scale-0 group-hover:scale-100 transition-transform duration-300 origin-center opacity-0 group-hover:opacity-100" />
+                </Link>
+              ))}
+              {adminLinks.map((link) => (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate(link.path);
+                  }}
+                  className={`relative px-3 py-2 text-sm font-medium transition-all duration-300 ease-out group animate-fade-in-up ${
+                    isActive(link.path)
+                      ? "text-primary"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <span className="relative z-10">{link.label}</span>
+                  <span
+                    className={`absolute bottom-0 left-0 right-0 h-0.5 bg-primary transform origin-left transition-all duration-300 ${
+                      isActive(link.path) 
+                        ? "scale-x-100 opacity-100" 
+                        : "scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-100"
+                    }`}
+                  />
+                  <span className="absolute inset-0 bg-primary/5 rounded-md scale-0 group-hover:scale-100 transition-transform duration-300 origin-center opacity-0 group-hover:opacity-100" />
+                </Link>
+              ))}
+              <Button 
                 onClick={(e) => {
                   e.preventDefault();
-                  navigate(link.path);
+                  navigate("/contact");
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                className={`relative px-3 py-2 text-sm font-medium transition-all duration-300 ease-out group hover:-translate-y-0.5 ${
-                  isActive(link.path)
-                    ? "text-primary"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6 py-2 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/30 active:scale-95 animate-fade-in-up [animation-delay:.25s]"
               >
-                <span className="relative z-10">{link.label}</span>
-                {/* Active underline */}
-                <span
-                  className={`absolute bottom-0 left-0 right-0 h-0.5 bg-primary transform origin-left transition-all duration-300 ${
-                    isActive(link.path) 
-                      ? "scale-x-100 opacity-100" 
-                      : "scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-100"
-                  }`}
-                />
-                {/* Hover background effect */}
-                <span className="absolute inset-0 bg-primary/5 rounded-md scale-0 group-hover:scale-100 transition-transform duration-300 origin-center opacity-0 group-hover:opacity-100" />
-              </Link>
-            ))}
-            {adminLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                onClick={(e) => {
-                  e.preventDefault();
-                  navigate(link.path);
-                }}
-                className={`relative px-3 py-2 text-sm font-medium transition-all duration-300 ease-out group ${
-                  isActive(link.path)
-                    ? "text-primary"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <span className="relative z-10">{link.label}</span>
-                <span
-                  className={`absolute bottom-0 left-0 right-0 h-0.5 bg-primary transform origin-left transition-all duration-300 ${
-                    isActive(link.path) 
-                      ? "scale-x-100 opacity-100" 
-                      : "scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-100"
-                  }`}
-                />
-                <span className="absolute inset-0 bg-primary/5 rounded-md scale-0 group-hover:scale-100 transition-transform duration-300 origin-center opacity-0 group-hover:opacity-100" />
-              </Link>
-            ))}
-            <Button 
-              onClick={(e) => {
-                e.preventDefault();
-                navigate("/contact");
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6 py-2 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/30 active:scale-95"
-            >
-              Contact Us
-            </Button>
-          </div>
+                Contact Us
+              </Button>
+            </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            className="lg:hidden text-foreground p-2 rounded-lg hover:bg-secondary/50 transition-all duration-300 active:scale-95"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            aria-label="Toggle menu"
-          >
-            {isMobileMenuOpen ? (
-              <X size={24} className="transition-transform duration-300 rotate-0" />
-            ) : (
-              <Menu size={24} className="transition-transform duration-300" />
-            )}
-          </button>
+            <button
+              className="lg:hidden text-foreground p-2 rounded-lg hover:bg-secondary/50 transition-all duration-300 active:scale-95"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              {isMobileMenuOpen ? (
+                <X size={24} className="transition-transform duration-300 rotate-0" />
+              ) : (
+                <Menu size={24} className="transition-transform duration-300" />
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Mobile Menu */}
@@ -177,10 +175,7 @@ const Navbar = () => {
                   isActive(link.path)
                     ? "text-primary bg-primary/10 border-l-2 border-primary"
                     : "text-muted-foreground hover:text-foreground hover:bg-secondary/50 active:bg-secondary/70"
-                }`}
-                style={{ 
-                  transitionDelay: isMobileMenuOpen ? `${index * 0.05}s` : '0s'
-                }}
+                } ${isMobileMenuOpen ? (index === 0 ? "[transition-delay:0s]" : index === 1 ? "[transition-delay:.05s]" : index === 2 ? "[transition-delay:.1s]" : index === 3 ? "[transition-delay:.15s]" : index === 4 ? "[transition-delay:.2s]" : index === 5 ? "[transition-delay:.25s]" : index === 6 ? "[transition-delay:.3s]" : index === 7 ? "[transition-delay:.35s]" : "[transition-delay:.4s]") : ""}`}
               >
                 {link.label}
               </Link>
@@ -202,10 +197,7 @@ const Navbar = () => {
                   isActive(link.path)
                     ? "text-primary bg-primary/10 border-l-2 border-primary"
                     : "text-muted-foreground hover:text-foreground hover:bg-secondary/50 active:bg-secondary/70"
-                }`}
-                style={{ 
-                  transitionDelay: isMobileMenuOpen ? `${(navLinks.length + index) * 0.05}s` : '0s'
-                }}
+                } ${isMobileMenuOpen ? ((navLinks.length + index) === 8 ? "[transition-delay:.4s]" : (navLinks.length + index) === 9 ? "[transition-delay:.45s]" : "[transition-delay:.5s]") : ""}`}
               >
                 {link.label}
               </Link>
@@ -215,10 +207,7 @@ const Navbar = () => {
                 isMobileMenuOpen 
                   ? "translate-x-0 opacity-100" 
                   : "translate-x-full opacity-0"
-              }`}
-              style={{ 
-                transitionDelay: isMobileMenuOpen ? `${(navLinks.length + adminLinks.length) * 0.05}s` : '0s'
-              }}
+              } ${isMobileMenuOpen ? "[transition-delay:.5s]" : ""}`}
             >
               <Button 
                 onClick={(e) => {

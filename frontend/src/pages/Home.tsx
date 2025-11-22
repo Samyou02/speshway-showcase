@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import heroImage from "@/assets/hero-bg.png";
-import { FadeIn, StaggerContainer, StaggerItem, HoverScale } from "@/components/animations";
+import heroImage from "@/assets/happyFamily.png";
+import { FadeIn, StaggerContainer, StaggerItem, HoverScale, ScrollReveal, ParallaxHero } from "@/components/animations";
+import { useEffect, useState } from "react";
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
 
@@ -18,6 +19,39 @@ const Home = () => {
       return Array.isArray(data) ? data : (data?.data || data || []);
     }),
   });
+
+  const { data: banners } = useQuery({
+    queryKey: ['home-banners'],
+    queryFn: () => api.get('/home-banners').then(res => res.data),
+  });
+
+  const [heroIndex, setHeroIndex] = useState(0);
+  const activeBanners = Array.isArray(banners)
+    ? banners.filter((b: any) => b.isActive).sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0))
+    : [];
+
+  useEffect(() => {
+    setHeroIndex(0);
+  }, [activeBanners.length]);
+
+  useEffect(() => {
+    if (activeBanners.length > 1) {
+      const id = setInterval(() => {
+        setHeroIndex((i) => (i + 1) % activeBanners.length);
+      }, 5000);
+      return () => clearInterval(id);
+    }
+  }, [activeBanners.length]);
+
+  const heroBgSrc = activeBanners.length > 0
+    ? activeBanners[heroIndex]?.image?.url
+    : heroImage;
+
+  
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
 
   const features = [
     {
@@ -46,33 +80,23 @@ const Home = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
-        <div
-          className="absolute inset-0 z-0"
-          style={{
-            backgroundImage: `url(${heroImage})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            filter: "brightness(0.3)",
-          }}
-        />
-        <div className="absolute inset-0 z-0 bg-gradient-to-b from-background/50 via-background/70 to-background" />
-        <div className="container mx-auto px-4 relative z-10">
-          <FadeIn delay={0.2} duration={0.8}>
-            <div className="max-w-4xl mx-auto text-center space-y-8">
+      <ParallaxHero backgroundImage={heroBgSrc}>
+        
+        <ScrollReveal delay={0.1}>
+          <div className="max-w-4xl mx-auto text-center space-y-8">
             <div className="inline-block">
               <span className="px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium animate-glow">
                 Welcome to the Future of IT
               </span>
             </div>
-            <h1 className="text-5xl md:text-7xl font-bold text-foreground leading-tight">
+            <h1 className="text-5xl md:text-7xl font-bold text-white leading-tight drop-shadow">
               Transform Your Business with{" "}
               <span className="text-primary bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                 Cutting-Edge
               </span>{" "}
               Technology
             </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-xl text-white/80 max-w-2xl mx-auto drop-shadow">
               Speshway Solutions delivers innovative IT solutions that drive digital transformation and accelerate
               business growth in the modern era.
             </p>
@@ -93,13 +117,12 @@ const Home = () => {
                 </Button>
               </Link>
             </div>
-            </div>
-          </FadeIn>
-        </div>
+          </div>
+        </ScrollReveal>
+      </ParallaxHero>
 
-        <div className="absolute bottom-20 left-10 w-20 h-20 bg-primary/20 rounded-full blur-3xl animate-float" />
-        <div className="absolute top-40 right-20 w-32 h-32 bg-accent/20 rounded-full blur-3xl animate-float" style={{ animationDelay: "2s" }} />
-      </section>
+      <div className="absolute bottom-20 left-10 w-20 h-20 bg-primary/20 rounded-full blur-3xl animate-float" />
+      <div className="absolute top-40 right-20 w-32 h-32 bg-accent/20 rounded-full blur-3xl animate-float [animation-delay:2s]" />
       <section className="py-20 bg-secondary/20">
         <div className="container mx-auto px-4">
           <StaggerContainer staggerDelay={0.15}>

@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/api";
-import { StaggerContainer, StaggerItem, HoverScale, FadeIn } from "@/components/animations";
+import { StaggerContainer, StaggerItem, HoverScale, FadeIn, ScrollReveal } from "@/components/animations";
 
 const Portfolio = () => {
   const [selectedProject, setSelectedProject] = useState<any>(null);
@@ -63,7 +63,7 @@ const Portfolio = () => {
       <section className="pt-32 pb-20 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent" />
         <div className="container mx-auto px-4 relative z-10">
-          <FadeIn>
+          <ScrollReveal>
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6">
               <span className="text-primary">Projects</span>
@@ -72,7 +72,7 @@ const Portfolio = () => {
               Showcasing our successful projects and the innovative solutions we've delivered for clients worldwide.
             </p>
           </div>
-          </FadeIn>
+          </ScrollReveal>
         </div>
       </section>
 

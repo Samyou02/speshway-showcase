@@ -100,7 +100,7 @@ const ManageServices = () => {
     setFormData({
       title: service.title,
       description: service.description,
-      features: service.features.join('\n'),
+      features: Array.isArray(service.features) ? service.features.join('\n') : service.features || '',
       icon: service.icon || 'Code'
     });
     setIsDialogOpen(true);

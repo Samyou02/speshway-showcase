@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Link } from "react-router-dom";
+import { ScrollReveal } from "@/components/animations";
 
 const Career = () => {
   const benefits = [
@@ -47,7 +48,8 @@ const Career = () => {
       <section className="pt-24 sm:pt-28 md:pt-32 pb-12 sm:pb-16 md:pb-20 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent" />
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
-          <div className="max-w-3xl mx-auto text-center animate-fade-in-up">
+          <ScrollReveal>
+          <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 sm:mb-6">
               Join Our <span className="text-primary">Team</span>
             </h1>
@@ -56,6 +58,7 @@ const Career = () => {
               talented individuals to join our growing team.
             </p>
           </div>
+          </ScrollReveal>
         </div>
       </section>
 

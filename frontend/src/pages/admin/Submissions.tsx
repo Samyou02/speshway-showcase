@@ -174,7 +174,7 @@ const Submissions = () => {
   if (isLoading) return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <section className="pt-32 pb-20">
+      <section className="pt-16 pb-16">
         <div className="container mx-auto px-4">
           <div className="text-center">Loading...</div>
         </div>
@@ -186,7 +186,7 @@ const Submissions = () => {
   if (error) return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <section className="pt-32 pb-20">
+      <section className="pt-16 pb-16">
         <div className="container mx-auto px-4">
           <div className="text-center text-red-500">An error has occurred: {error.message}</div>
         </div>
@@ -199,7 +199,7 @@ const Submissions = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <section className="pt-32 pb-20">
+      <section className="pt-16 pb-16">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <div className="flex justify-between items-center mb-8">

@@ -9,7 +9,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Link } from "react-router-dom";
 import api from "@/lib/api";
-import { FadeIn, StaggerContainer, StaggerItem, HoverScale } from "@/components/animations";
+import { FadeIn, StaggerContainer, StaggerItem, HoverScale, ScrollReveal } from "@/components/animations";
 
 const Contact = () => {
   const { toast } = useToast();
@@ -92,7 +92,7 @@ const Contact = () => {
       <section className="pt-24 sm:pt-28 md:pt-32 pb-12 sm:pb-16 md:pb-20 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent" />
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
-          <FadeIn>
+          <ScrollReveal>
             <div className="max-w-3xl mx-auto text-center">
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 sm:mb-6">
                 Get In <span className="text-primary">Touch</span>
@@ -101,37 +101,35 @@ const Contact = () => {
                 Have a question or want to discuss a project? We'd love to hear from you.
               </p>
             </div>
-          </FadeIn>
+          </ScrollReveal>
         </div>
       </section>
 
       {/* Contact Info Cards */}
       <section className="py-8 sm:py-12">
         <div className="container mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 max-w-6xl mx-auto">
-            <StaggerContainer staggerDelay={0.1}>
-              {contactInfo.map((info, index) => (
-                <StaggerItem key={index}>
-                  <HoverScale>
-                    <Card
-                      className="p-4 sm:p-6 bg-card/50 backdrop-blur-sm border-border hover:border-primary/50 transition-all duration-300 text-center group hover-lift hover-glow"
+          <StaggerContainer staggerDelay={0.1} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 max-w-6xl mx-auto">
+            {contactInfo.map((info, index) => (
+              <StaggerItem key={index}>
+                <HoverScale>
+                  <Card
+                    className="p-4 sm:p-6 bg-card/50 backdrop-blur-sm border-border hover:border-primary/50 transition-all duration-300 text-center group hover-lift hover-glow"
+                  >
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
+                      <info.icon className="text-primary" size={24} />
+                    </div>
+                    <h3 className="text-base sm:text-lg font-semibold text-foreground mb-2">{info.title}</h3>
+                    <a
+                      href={info.link}
+                      className="text-sm sm:text-base text-muted-foreground hover:text-primary transition-colors duration-300 break-words"
                     >
-                      <div className="w-12 h-12 sm:w-14 sm:h-14 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
-                        <info.icon className="text-primary" size={24} />
-                      </div>
-                      <h3 className="text-base sm:text-lg font-semibold text-foreground mb-2">{info.title}</h3>
-                      <a
-                        href={info.link}
-                        className="text-sm sm:text-base text-muted-foreground hover:text-primary transition-colors duration-300 break-words"
-                      >
-                        {info.content}
-                      </a>
-                    </Card>
-                  </HoverScale>
-                </StaggerItem>
-              ))}
-            </StaggerContainer>
-          </div>
+                      {info.content}
+                    </a>
+                  </Card>
+                </HoverScale>
+              </StaggerItem>
+            ))}
+          </StaggerContainer>
         </div>
       </section>
 

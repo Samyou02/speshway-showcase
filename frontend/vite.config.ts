@@ -20,7 +20,6 @@ export default defineConfig(({ mode }) => ({
       output: {
         manualChunks: {
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'antd-vendor': ['antd', '@ant-design/icons'],
           'query-vendor': ['@tanstack/react-query'],
           'animation-vendor': ['framer-motion'],
         },
@@ -37,6 +36,6 @@ export default defineConfig(({ mode }) => ({
     },
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom', 'antd', '@ant-design/icons', 'framer-motion'],
+    include: ['react', 'react-dom', 'react-router-dom', 'framer-motion'],
   },
 }));

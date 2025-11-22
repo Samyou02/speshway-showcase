@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Link } from "react-router-dom";
-import { FadeIn, StaggerContainer, StaggerItem, HoverScale } from "@/components/animations";
+import { FadeIn, StaggerContainer, StaggerItem, HoverScale, ScrollReveal } from "@/components/animations";
 
 const FAQ = () => {
   const faqs = [
@@ -68,7 +68,7 @@ const FAQ = () => {
       <section className="pt-32 pb-20 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent" />
         <div className="container mx-auto px-4 relative z-10">
-          <FadeIn>
+          <ScrollReveal>
             <div className="max-w-3xl mx-auto text-center">
               <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6">
                 Frequently Asked <span className="text-primary">Questions</span>
@@ -77,7 +77,7 @@ const FAQ = () => {
                 Find answers to common questions about our services, process, and how we can help your business.
               </p>
             </div>
-          </FadeIn>
+          </ScrollReveal>
         </div>
       </section>
 

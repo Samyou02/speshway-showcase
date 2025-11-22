@@ -50,6 +50,13 @@ const Dashboard = () => {
       color: 'from-pink-500/20 to-rose-500/20'
     },
     {
+      title: 'Home Images',
+      description: 'Manage homepage banners',
+      icon: Image,
+      path: '/admin/home-banners',
+      color: 'from-cyan-500/20 to-teal-500/20'
+    },
+    {
       title: 'Clients',
       description: 'Manage client testimonials',
       icon: Building2,
@@ -69,7 +76,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <section className="pt-32 pb-20">
+      <section className="pt-16 pb-16">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <div className="flex justify-between items-center mb-8">

@@ -5,7 +5,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/api";
-import { FadeIn, StaggerContainer, StaggerItem, HoverScale } from "@/components/animations";
+import { FadeIn, StaggerContainer, StaggerItem, HoverScale, ScrollReveal } from "@/components/animations";
 
 const Team = () => {
   const { data: team, isLoading, error } = useQuery({
@@ -49,7 +49,7 @@ const Team = () => {
       <section className="relative py-24 sm:py-28 md:py-32 bg-gradient-to-br from-primary/20 via-background to-background">
         <div className="absolute inset-0 bg-grid-pattern opacity-30" />
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
-          <FadeIn>
+          <ScrollReveal>
             <div className="max-w-4xl mx-auto text-center">
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 sm:mb-6">
                 Meet Our <span className="text-primary">Team</span>
@@ -58,7 +58,7 @@ const Team = () => {
                 Talented professionals dedicated to delivering exceptional results and driving your success.
               </p>
             </div>
-          </FadeIn>
+          </ScrollReveal>
         </div>
       </section>
 
